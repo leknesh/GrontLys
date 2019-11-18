@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">GrontLys</string>
+    <string name="app_name">Grønt Lys</string>
     <string name="action_settings">Settings</string>
+    <string name="placeholder">Placeholder</string>
+    <string name="sok_spisested">Søk spisested</string>
+    <string name="sok_poststed">Søk poststed</string>
+    <string name="sok">Søk</string>
+    <string name="sok_her">Søk i nærheten</string>
 </resources>
