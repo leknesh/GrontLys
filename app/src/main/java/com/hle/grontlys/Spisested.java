@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Spisested implements Serializable {
+public class Spisested {
     private String orgNr;
     private String navn;
     private String adresse;

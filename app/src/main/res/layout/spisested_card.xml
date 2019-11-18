@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/navn_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/placeholder"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/orgnr_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/navn_card"
+            android:text="@string/placeholder"
+            android:padding="8dp"/>
+
+        <ImageView
+            android:id="@+id/karakter_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="8dp"
+            android:drawable="@drawable/ic_smiley_green"
+            android:drawingCacheQuality="high"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/adresse_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/navn_card"
+            android:layout_alignStart="@id/navn_card"
+            android:text="@string/placeholder"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/postnr_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/adresse_card"
+            android:layout_alignStart="@id/adresse_card"
+            android:text="@string/placeholder"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/poststed_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/adresse_card"
+            android:layout_toEndOf="@id/postnr_card"
+            android:text="@string/placeholder"
+            android:padding="8dp"/>
+
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>

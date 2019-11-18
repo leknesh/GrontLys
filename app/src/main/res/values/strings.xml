@@ -6,4 +6,5 @@
     <string name="sok_poststed">Søk poststed</string>
     <string name="sok">Søk</string>
     <string name="sok_her">Søk i nærheten</string>
+    <string name="title_sokeliste">SokelisteActivity</string>
 </resources>
