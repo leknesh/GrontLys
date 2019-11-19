@@ -1,50 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="16dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/navn_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
+            android:paddingTop="8dp"
             android:text="@string/placeholder"
-            android:padding="8dp"/>
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/orgnr_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/navn_card"
-            android:text="@string/placeholder"
-            android:padding="8dp"/>
+            android:layout_below="@id/navn_card"
+            android:layout_alignStart="@id/navn_card"
+            android:text="@string/placeholder" />
 
-        <ImageView
-            android:id="@+id/karakter_card"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_margin="8dp"
-            android:drawable="@drawable/ic_smiley_green"
-            android:drawingCacheQuality="high"
-            android:padding="8dp"/>
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/dato_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/placeholder" />
+
+            <ImageView
+                android:id="@+id/karakter_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:drawingCacheQuality="high"
+                tools:srcCompat="@drawable/ic_highlight_off_blue_60dp" />
+
+        </LinearLayout>
+
+
 
         <TextView
             android:id="@+id/adresse_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/navn_card"
-            android:layout_alignStart="@id/navn_card"
-            android:text="@string/placeholder"
-            android:padding="8dp"/>
+            android:layout_below="@id/orgnr_card"
+            android:layout_alignStart="@id/orgnr_card"
+            android:text="@string/placeholder" />
 
         <TextView
             android:id="@+id/postnr_card"
@@ -52,8 +66,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/adresse_card"
             android:layout_alignStart="@id/adresse_card"
-            android:text="@string/placeholder"
-            android:padding="8dp"/>
+            android:paddingRight="8dp"
+            android:text="@string/placeholder" />
 
         <TextView
             android:id="@+id/poststed_card"
@@ -61,8 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/adresse_card"
             android:layout_toEndOf="@id/postnr_card"
-            android:text="@string/placeholder"
-            android:padding="8dp"/>
+            android:text="@string/placeholder" />
 
 
     </RelativeLayout>

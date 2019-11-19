@@ -7,4 +7,10 @@
     <string name="sok">Søk</string>
     <string name="sok_her">Søk i nærheten</string>
     <string name="title_sokeliste">SokelisteActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="angry_face">Angry face</string>
+    <string name="neutral_face">Neutral Face</string>
+    <string name="happy_face">Happy face</string>
 </resources>

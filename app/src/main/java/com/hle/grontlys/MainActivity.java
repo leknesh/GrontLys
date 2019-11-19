@@ -2,10 +2,12 @@ package com.hle.grontlys;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -28,17 +30,12 @@ import com.android.volley.toolbox.Volley;
 import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, Response.ErrorListener, Response.Listener<String> {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText navnEditText, poststedEditText;
     private String sokeNavn, sokePoststed;
     private ArrayList<Spisested> spisestedListe= new ArrayList<>();
 
-    //endpoint for CRUD-api
-    private static final String ENDPOINT = "https://hotell.difi.no/api/json/mattilsynet/smilefjes/tilsyn?";
-    //søkeparametre for api
-    private static final String KOL_NAVN        = "navn";
-    private static final String KOL_POSTSTED    = "poststed";
 
     //logtag
     private static final String TAG = "JsonLog";
@@ -86,65 +83,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void startSpisestedSok() {
         sokeNavn        = navnEditText.getText().toString();
         sokePoststed    = poststedEditText.getText().toString();
-        String URL = ENDPOINT;
 
         //lar ikke bruker hente hele datasettet
         if (sokeNavn.isEmpty() && sokePoststed.isEmpty()){
             displayToast("Legg inn navn på spisested og/eller poststed");
         }
-        else if (!sokeNavn.isEmpty()){
-            URL += KOL_NAVN + "=" + sokeNavn;
-        }
         else {
-            URL += KOL_POSTSTED + "=" + sokePoststed;
+            Intent intent = new Intent(this, SokelisteActivity.class);
+            intent.putExtra("sokenavn", sokeNavn);
+            intent.putExtra("sokepoststed", sokePoststed);
+
+            startActivity(intent);
         }
-
-        //henter resultat asynkront vhja Volley
-        if (isOnline()){
-            RequestQueue queue = Volley.newRequestQueue(this);
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, URL, this, this);
-            queue.add(stringRequest);
-            Log.d(TAG, URL);
-        }
-
-
     }
 
     private void startOmradeSok() {
     }
-
-    /******************************
-     *
-     * Behandling av Volley-oppslag
-     */
-
-    @Override
-    public void onResponse(String response) {
-
-        spisestedListe = Spisested.listSpisesteder(response);
-
-        if (spisestedListe.isEmpty()){
-            displayToast("Ingen spisesteder funnet!");
-        }
-        else {
-            startListeActivity();
-        }
-
-    }
-
-
-    @Override
-    public void onErrorResponse(VolleyError error) {
-
-    }
-
-    //går til listeactivity
-    private void startListeActivity() {
-        Intent intent = new Intent(this, SokelisteActivity.class);
-        intent.putExtra("spisesteder", spisestedListe);
-        startActivity(intent);
-    }
-
 
 
 
@@ -176,16 +130,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /******************************
-     * Utility-metoder
+     * Håndtering av Landscape/portrait
      *
      */
 
-    // Checks network connection
-    public boolean isOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
+
+    /******************************
+     * Utility-metoder
+     *
+     */
 
     //viser toastmelding med valgt tekstinput
     public void displayToast(String message) {

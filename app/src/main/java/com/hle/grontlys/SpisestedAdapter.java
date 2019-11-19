@@ -53,6 +53,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
         private TextView adresseTextView;
         private TextView postNrTextView;
         private TextView postStedTextView;
+        private TextView datoTextView;
         private ImageView karakterImageView;
 
         SpisestedViewHolder(View itemView) {
@@ -64,6 +65,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
             adresseTextView = itemView.findViewById(R.id.adresse_card);
             postNrTextView = itemView.findViewById(R.id.postnr_card);
             postStedTextView = itemView.findViewById(R.id.poststed_card);
+            datoTextView = itemView.findViewById(R.id.dato_card);
             karakterImageView = itemView.findViewById(R.id.karakter_card);
 
             itemView.setOnClickListener(this);
@@ -71,25 +73,26 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
         void bindTo(Spisested spisestedet) {
             navnTextView.setText(spisestedet.getNavn());
-            orgNrTextView.setText(spisestedet.getOrgNr());
+            orgNrTextView.setText("Org.nr: " + spisestedet.getOrgNr());
             adresseTextView.setText(spisestedet.getAdresse());
             postNrTextView.setText(spisestedet.getPostNr());
             postStedTextView.setText(spisestedet.getPostSted());
+            datoTextView.setText(spisestedet.getArstall());
 
             //ref karakterskala beskrevet her: https://data.norge.no/data/mattilsynet/smilefjestilsyn-p%C3%A5-serveringssteder
             switch (spisestedet.getTotKarakter()) {
                 case "0":
                 case "1":
-                    karakterImageView.setImageResource(R.drawable.ic_smiley_green);
+                    karakterImageView.setImageResource(R.drawable.ic_sentiment_satisfied_green_60dp);
                     break;
                 case "2":
-                    karakterImageView.setImageResource(R.drawable.ic_smiley_yellow);
+                    karakterImageView.setImageResource(R.drawable.ic_sentiment_neutral_yellow_60dp);
                     break;
                 case "3":
-                    karakterImageView.setImageResource(R.drawable.ic_smiley_red);
+                    karakterImageView.setImageResource(R.drawable.ic_sentiment_dissatisfied_red_60dp);
                     break;
                 default:
-                    karakterImageView.setImageResource(0);
+                    karakterImageView.setImageResource(R.drawable.ic_highlight_off_blue_60dp);
                     break;
             }
 

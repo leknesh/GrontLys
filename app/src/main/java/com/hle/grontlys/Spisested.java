@@ -5,16 +5,16 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Spisested {
+public class Spisested implements Comparable {
+
     private String orgNr;
     private String navn;
     private String adresse;
     private String postNr;
     private String postSted;
+    private String objektId;
     private String tilsynId;
     private String arstall;
     private String totKarakter;
@@ -25,6 +25,7 @@ public class Spisested {
     private static final String KOL_ADRESSE     = "adrlinje1";
     private static final String KOL_POSTNR      = "postnr";
     private static final String KOL_POSTSTED    = "poststed";
+    private static final String KOL_OBJEKTID    = "tilsynobjektid";
     private static final String KOL_TILSYNID    = "tilsynid";
     private static final String KOL_DATO        = "dato";
     private static final String KOL_KARAKTER    = "total_karakter";
@@ -45,8 +46,8 @@ public class Spisested {
         this.postNr = jsonObject.optString(KOL_POSTNR);
         this.postSted = jsonObject.optString(KOL_POSTSTED);
         this.tilsynId = jsonObject.optString(KOL_TILSYNID);
+        this.objektId = jsonObject.optString(KOL_OBJEKTID);
         this.totKarakter = jsonObject.optString(KOL_KARAKTER);
-        //plukker ut årstallet (kanskje)
         this.arstall = jsonObject.optString(KOL_DATO).substring(4);
 
     }
@@ -77,6 +78,10 @@ public class Spisested {
 
     public String getTilsynId() {
         return tilsynId;
+    }
+
+    public String getObjektId() {
+        return objektId;
     }
 
     public String getArstall() {
@@ -138,5 +143,16 @@ public class Spisested {
                 ", navn='" + navn + '\'' +
                 ", År='" + arstall + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Spisested s = (Spisested) o;
+        if (navn.equals(s.getNavn()))
+            return 0;
+        else if (navn.compareTo(s.getNavn()) > 0)
+            return 1;
+        else
+            return -1;
     }
 }
