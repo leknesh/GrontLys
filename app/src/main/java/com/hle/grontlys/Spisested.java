@@ -15,7 +15,6 @@ public class Spisested implements Comparable {
     private String postNr;
     private String postSted;
     private String objektId;
-    private String tilsynId;
     private String arstall;
     private String totKarakter;
 
@@ -25,8 +24,7 @@ public class Spisested implements Comparable {
     private static final String KOL_ADRESSE     = "adrlinje1";
     private static final String KOL_POSTNR      = "postnr";
     private static final String KOL_POSTSTED    = "poststed";
-    private static final String KOL_OBJEKTID    = "tilsynobjektid";
-    private static final String KOL_TILSYNID    = "tilsynid";
+    private static final String KOL_OBJEKTID    = "tilsynsobjektid";
     private static final String KOL_DATO        = "dato";
     private static final String KOL_KARAKTER    = "total_karakter";
 
@@ -45,7 +43,6 @@ public class Spisested implements Comparable {
         this.adresse = jsonObject.optString(KOL_ADRESSE);
         this.postNr = jsonObject.optString(KOL_POSTNR);
         this.postSted = jsonObject.optString(KOL_POSTSTED);
-        this.tilsynId = jsonObject.optString(KOL_TILSYNID);
         this.objektId = jsonObject.optString(KOL_OBJEKTID);
         this.totKarakter = jsonObject.optString(KOL_KARAKTER);
         this.arstall = jsonObject.optString(KOL_DATO).substring(4);
@@ -74,10 +71,6 @@ public class Spisested implements Comparable {
 
     public String getPostSted() {
         return postSted;
-    }
-
-    public String getTilsynId() {
-        return tilsynId;
     }
 
     public String getObjektId() {
@@ -111,7 +104,7 @@ public class Spisested implements Comparable {
             for (int i=0; i<jsonArray.length(); i++){
                 Spisested spisested = new Spisested(jsonArray.getJSONObject(i));
 
-                //ønsker KUN individuelle spisesteder i denne omgang, sorterer på OrgNr
+                //ønsker KUN individuelle spisesteder i denne omgang, sorterer på ObjektId
                 if (!spisesteder.contains(spisested)){
 
                     Log.d(TAG, spisested.toString());
@@ -132,7 +125,7 @@ public class Spisested implements Comparable {
     public boolean equals(Object o){
         Spisested s = (Spisested) o;
 
-        return (this.orgNr.equals(s.getOrgNr()));
+        return (this.objektId.equals(s.getObjektId()));
 
     }
 
