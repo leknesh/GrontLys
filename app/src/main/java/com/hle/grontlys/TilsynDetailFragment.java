@@ -20,23 +20,38 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ExpandableListView;
 
 import java.util.ArrayList;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 
 /**
+ * @henriette:
+ *
+ * Koden her er basert på Android Studio sin Master/detail-mal
+ * PLUSS kode hentet fra eksempler på expandableList:
+ * https://stackoverflow.com/questions/24083886/expandablelistview-in-fragment-issue
+ * https://androidexample.com/Custom_Expandable_ListView_Tutorial_-_Android_Example/index.php?view=article_discription&aid=107&aaid=129
+ * Kode fra dette eksemplet er beholdt med sine opprinnelige variabelnavn der det
+ * er mulig, f.ex children, groups, rootView, lv //
+ */
+
+/**
+ * Master/detail mal kommentar:
  * A fragment representing a single Tilsyn detail screen.
  * This fragment is either contained in a {@link TilsynListActivity}
  * in two-pane mode (on tablets) or a {@link TilsynDetailActivity}
  * on handsets.
  */
+
 public class TilsynDetailFragment extends Fragment implements Response.ErrorListener, Response.Listener<String> {
 
-    //liste tilsynsdetaljobjekter
-    private ArrayList<TilsynsDetalj> detaljListe = new ArrayList<>();
+
+    //Tilsynsobjekt som sendes inn i fragmentet
+    private Tilsyn valgtTilsyn;
+
+    //liste fylles med alle vurderte tilsynsdetaljobjekter for dette tilsynet
+    private ArrayList<TilsynsDetalj> detaljListe;
 
     //endpoint for CRUD-api
     private static final String ENDPOINT_DETALJ =
@@ -45,15 +60,10 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     //logtag
     private static final String TAG = "JsonLog";
 
+    View rootView;
+    ExpandableListView lv;
     private Context mContext;
-    /**
-     * The dummy content this fragment is presenting.
-     */
-    private Tilsyn valgtTilsyn;
-    //private TilsynsDetalj mItem;
 
-    //viewelementer
-    TextView textView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -62,6 +72,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     public TilsynDetailFragment() {
     }
 
+    //oncreate starter uthenting av tilsynsdetaljer ut fra tilsynsobjekt sendt fra parent activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,16 +83,38 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         assert getArguments() != null;
         valgtTilsyn = (Tilsyn) getArguments().getSerializable("valgtTilsyn");
 
-        //starter metode for uthenting av tilsynsdetaljdata
+        //starter metode for uthenting av tilsynsdetaljdata for gjeldende tilsynsId
         assert valgtTilsyn != null;
         hentTilsynsdetaljer(valgtTilsyn.getTilsynId());
 
+        //setter opp hovedvindu (kode satt opp av master/detail-mal)
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
-            appBarLayout.setTitle(valgtTilsyn.getNavn() + " " + valgtTilsyn.getDato());
+            appBarLayout.setTitle(valgtTilsyn.getNavn() + "/n" + valgtTilsyn.getDato());
         }
     }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.tilsyn_detail, container, false);
+
+        return rootView;
+    }
+
+    //kode hentet fra Listview-eksempel
+    //https://stackoverflow.com/questions/24083886/expandablelistview-in-fragment-issue
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        lv = (ExpandableListView) view.findViewById(R.id.expListView);
+        lv.setAdapter(new MyExpandableListAdapter(mContext, valgtTilsyn, detaljListe));
+        lv.setGroupIndicator(null);
+
+    }
+
 
     private void hentTilsynsdetaljer(String tilsynId) {
 
@@ -101,7 +134,6 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
         Log.d(TAG, "DetaljVolleyrespons: " + response);
         detaljListe = TilsynsDetalj.listTilsynsDetaljer(response);
-        Log.d(TAG, "Antall vurderingspunkter: " + detaljListe.size());
 
     }
 
@@ -111,7 +143,6 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     }
 
 
-
     // Checks network connection
     public boolean isOnline() {
         ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Activity.CONNECTIVITY_SERVICE);
@@ -119,20 +150,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         return (networkInfo != null && networkInfo.isConnected());
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.tilsyn_detail, container, false);
 
-        //textView = rootView.findViewById(R.id.tilsyn_detail);
-
-        if (valgtTilsyn != null && detaljListe != null) {
-            Log.d("TAG", "Valgt tilsyn: " + valgtTilsyn.toString());
-            textView.setText(valgtTilsyn.getTema1());
-        }
-
-        return rootView;
-    }
 
 
 }

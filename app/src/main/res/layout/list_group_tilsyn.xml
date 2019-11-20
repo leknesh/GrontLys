@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tema_gruppe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/temagruppe"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tema_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginHorizontal="16dp"
+        android:layout_weight="1"
+        android:text="@string/placeholder"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/tema_karakter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:src="@drawable/ic_highlight_off_blue_60dp" />
+
+
+</LinearLayout>

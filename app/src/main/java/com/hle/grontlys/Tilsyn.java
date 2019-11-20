@@ -7,24 +7,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 //Klassen extender spisested, og benyttes for visning av hvert enkelt tilsynsobjekt
 public class Tilsyn extends Spisested {
 
     private String tilsynId;
-    private String karakter1;
-    private String karakter2;
-    private String karakter3;
-    private String karakter4;
 
-    //velger å også legge temabetegnelser i variabler, da disse betegnelsene kanskje kan variere over tid
-    //muliggjør også valg av nynorsk?
-    private String tema1;
-    private String tema2;
-    private String tema3;
-    private String tema4;
+    private ArrayList<Temaresultat> tilsynResultater;
+
+
 
     private static final String KOL_TILSYNID    = "tilsynid";
     private static final String KOL_KARAKTER1   = "karakter1";
@@ -45,19 +36,19 @@ public class Tilsyn extends Spisested {
     //JSON-konstruktør
     public Tilsyn(JSONObject jsonObject){
 
+        //denne gir navn/adr/totalkarakter mm
         super(jsonObject);
 
+        //henter ut tilsynsId, temanavn og tilhørende karakter
         this.tilsynId = jsonObject.optString(KOL_TILSYNID);
 
-        this.karakter1 = jsonObject.optString(KOL_KARAKTER1);
-        this.karakter2 = jsonObject.optString(KOL_KARAKTER2);
-        this.karakter3 = jsonObject.optString(KOL_KARAKTER3);
-        this.karakter4 = jsonObject.optString(KOL_KARAKTER4);
+        this.tilsynResultater = new ArrayList<>();
 
-        this.tema1 = jsonObject.optString(kol_tema1);
-        this.tema2 = jsonObject.optString(kol_tema2);
-        this.tema3 = jsonObject.optString(kol_tema3);
-        this.tema4 = jsonObject.optString(kol_tema4);
+        //legger inn resultater fra de enkelte temagruppene
+        tilsynResultater.add(new Temaresultat(jsonObject.optString(kol_tema1), jsonObject.optString(KOL_KARAKTER1) ));
+        tilsynResultater.add(new Temaresultat(jsonObject.optString(kol_tema2), jsonObject.optString(KOL_KARAKTER2) ));
+        tilsynResultater.add(new Temaresultat(jsonObject.optString(kol_tema3), jsonObject.optString(KOL_KARAKTER3) ));
+        tilsynResultater.add(new Temaresultat(jsonObject.optString(kol_tema4), jsonObject.optString(KOL_KARAKTER4) ));
 
     }
 
@@ -91,18 +82,6 @@ public class Tilsyn extends Spisested {
         return tilsynsListe;
     }
 
-    //hashmap til bruk i master/detail workflow
-    public static Map<String, Tilsyn>  lagTilsynHashMap(ArrayList<Tilsyn> tilsynsListe){
-        Map tilsynMap = new HashMap<String, Tilsyn>();
-        for (Tilsyn t : tilsynsListe){
-            tilsynMap.put(t.getDato(), t);
-        }
-        return tilsynMap;
-    }
-
-
-
-
 
     @Override
     public String toString() {
@@ -114,7 +93,7 @@ public class Tilsyn extends Spisested {
     }
 
     /******************************
-     * Gettere og settere
+     * Gettere
      *
      */
 
@@ -122,35 +101,35 @@ public class Tilsyn extends Spisested {
         return tilsynId;
     }
 
-    public String getKarakter1() {
-        return karakter1;
+    public ArrayList<Temaresultat> getTilsynResultater(){
+        return tilsynResultater;
     }
 
-    public String getKarakter2() {
-        return karakter2;
-    }
 
-    public String getKarakter3() {
-        return karakter3;
-    }
+    //indre klasse for å bygge arrayliste av resultater
+    public class Temaresultat {
+        private String temanavn;
+        private String temakarakter;
 
-    public String getKarakter4() {
-        return karakter4;
-    }
+        private Temaresultat(String temanavn, String temakarakter){
+            this.temanavn = temanavn;
+            this.temakarakter = temakarakter;
+        }
 
-    public String getTema1() {
-        return tema1;
-    }
+        public String getTemanavn() {
+            return temanavn;
+        }
 
-    public String getTema2() {
-        return tema2;
-    }
+        public void setTemanavn(String temanavn) {
+            this.temanavn = temanavn;
+        }
 
-    public String getTema3() {
-        return tema3;
-    }
+        public String getTemakarakter() {
+            return temakarakter;
+        }
 
-    public String getTema4() {
-        return tema4;
+        public void setTemakarakter(String temakarakter) {
+            this.temakarakter = temakarakter;
+        }
     }
 }

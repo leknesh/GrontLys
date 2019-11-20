@@ -20,4 +20,6 @@
     <string name="tema_2">Tema 2:</string>
     <string name="tema_3">Tema 3:</string>
     <string name="tema_4">Tema 4 :</string>
+    <string name="placeholder_long">Placeholder Placeholder Placeholder Placeholder Placeholder Placeholder</string>
+    <string name="temagruppe">Temagruppe:</string>
 </resources>

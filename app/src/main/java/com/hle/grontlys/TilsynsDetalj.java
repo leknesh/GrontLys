@@ -7,8 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TilsynsDetalj {
 
@@ -26,8 +24,8 @@ public class TilsynsDetalj {
     private static final String KOL_TEMAID      = "ordningsverdi";
     private static final String KOL_KARAKTER    = "karakter";
 
-    private static String kol_punktNavn         = "kravpunktnavn_no";
     private static String kol_punktForklaring   = "tekst_no";
+    private static String kol_punktNavn         = "kravpunktnavn_no";
 
     //logtag
     private static final String TAG = "JsonLog";
@@ -37,7 +35,7 @@ public class TilsynsDetalj {
     public TilsynsDetalj(JSONObject jsonObject){
 
         this.tilsynDetaljId     = jsonObject.optString(KOL_TILSYNID);
-        this.temaId             = jsonObject.optString(KOL_TEMAID);
+        this.temaId             = jsonObject.optString(KOL_TEMAID).substring(0,1);
         this.punktKarakter      = jsonObject.optString(KOL_KARAKTER);
 
         //kan legge inn if/else mot en lagret målform-preference!!!
@@ -65,15 +63,32 @@ public class TilsynsDetalj {
             for (int i=0; i<jsonArray.length(); i++){
                 TilsynsDetalj tilsynsDetalj = new TilsynsDetalj(jsonArray.getJSONObject(i));
 
-                Log.d(TAG, tilsynsDetalj.toString());
-                detaljListe.add(tilsynsDetalj);
-            }
+                //dersom karakter for punktet er 5, er punktet ikke vurdert og tas ikke med i resultatlisten!
+
+                if (!tilsynsDetalj.punktKarakter.equals("5"))
+                    detaljListe.add(tilsynsDetalj);
+                }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d(TAG, "JSONException Tilsyn");
         }
         return detaljListe;
+    }
+
+    //metode som henter ut kun de rader som hører til et gitt tilsynspunkt
+    public static ArrayList<TilsynsDetalj> hentChildRows(ArrayList<TilsynsDetalj> alleDetaljer, int temaId){
+        String id = "" + temaId;
+        ArrayList<TilsynsDetalj> childRows = new ArrayList<>();
+
+        //gjennolløper inputArray og henter ut rader fra valgte temakategori
+        for (TilsynsDetalj td : alleDetaljer){
+            if (td.temaId.equals(id) ){
+                childRows.add(td);
+            }
+        }
+
+        return childRows;
     }
 
 
