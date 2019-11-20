@@ -98,17 +98,22 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
         }
 
+        //klikk på et spisestedobjekt skal starte visning av tilsyn med tilsynsdetaljer.
         @Override
         public void onClick(View v) {
+
+            //henter valgt spisested
             Spisested spisestedet = spisestedListe.get(getAdapterPosition());
 
-            //Intent intent = new Intent(mContext, BarnehageDetaljActivity.class);
+            //oppretter intent og legger ved valgt spisested
+            Intent intent = new Intent(mContext, TilsynListActivity.class);
+            intent.putExtra("valgtspisested", spisestedet);
 
-            //sender med barnehageId for oppslag)
-            //intent.putExtra("barnehageNr", denneBarnehagen.getBarnehageNr());
+            //kontroll
             Log.d(TAG, "Valgt Spisested: " + spisestedet.getNavn());
 
-            //mContext.startActivity(intent);
+            //starter ny aktivitet
+            mContext.startActivity(intent);
         }
     }
 

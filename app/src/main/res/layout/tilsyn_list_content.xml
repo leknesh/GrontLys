@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="false"
+    android:layout_centerHorizontal="false"
+    android:layout_gravity="center_horizontal"
+    android:orientation="horizontal">
+
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/dato_tilsynlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingHorizontal="16dp"
+            android:text="@string/placeholder"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/karakter_tilsynList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:drawingCacheQuality="high"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="16dp"
+            tools:srcCompat="@drawable/ic_highlight_off_blue_60dp" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

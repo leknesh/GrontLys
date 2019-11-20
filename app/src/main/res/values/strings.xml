@@ -13,4 +13,11 @@
     <string name="angry_face">Angry face</string>
     <string name="neutral_face">Neutral Face</string>
     <string name="happy_face">Happy face</string>
+    <string name="title_tilsyn_list">Tilsyner</string>
+    <string name="title_tilsyn_detail">Tilsyn Detail</string>
+    <string name="tilsynsdato">Tilsynsdato:   </string>
+    <string name="tema_1">Tema 1:</string>
+    <string name="tema_2">Tema 2:</string>
+    <string name="tema_3">Tema 3:</string>
+    <string name="tema_4">Tema 4 :</string>
 </resources>

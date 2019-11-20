@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 //Klassen extender spisested, og benyttes for visning av hvert enkelt tilsynsobjekt
 public class Tilsyn extends Spisested {
@@ -89,12 +91,25 @@ public class Tilsyn extends Spisested {
         return tilsynsListe;
     }
 
+    //hashmap til bruk i master/detail workflow
+    public static Map<String, Tilsyn>  lagTilsynHashMap(ArrayList<Tilsyn> tilsynsListe){
+        Map tilsynMap = new HashMap<String, Tilsyn>();
+        for (Tilsyn t : tilsynsListe){
+            tilsynMap.put(t.getDato(), t);
+        }
+        return tilsynMap;
+    }
+
+
+
+
+
     @Override
     public String toString() {
         return "Tilsyn{" +
                 "tilsynId='" + tilsynId + '\'' +
-                ", tema1='" + tema1 + '\'' +
-                ", karakter1='" + karakter1 + '\'' +
+                ", Navn='" + getNavn() + '\'' +
+                ", Årstall='" + getArstall() + '\'' +
                 '}';
     }
 

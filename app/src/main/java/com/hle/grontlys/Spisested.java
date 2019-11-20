@@ -5,9 +5,11 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Spisested implements Comparable {
+public class Spisested implements Comparable, Serializable {
 
     private String orgNr;
     private String navn;
@@ -15,7 +17,7 @@ public class Spisested implements Comparable {
     private String postNr;
     private String postSted;
     private String objektId;
-    private String arstall;
+    private String dato;
     private String totKarakter;
 
     //json-keys
@@ -45,7 +47,7 @@ public class Spisested implements Comparable {
         this.postSted = jsonObject.optString(KOL_POSTSTED);
         this.objektId = jsonObject.optString(KOL_OBJEKTID);
         this.totKarakter = jsonObject.optString(KOL_KARAKTER);
-        this.arstall = jsonObject.optString(KOL_DATO).substring(4);
+        this.dato = jsonObject.optString(KOL_DATO);
 
     }
 
@@ -77,8 +79,15 @@ public class Spisested implements Comparable {
         return objektId;
     }
 
+    public String getDato() {
+
+        return dato.substring(0,2)
+                + "." + dato.substring(2,4)
+                + "." + dato.substring(4);
+    }
+
     public String getArstall() {
-        return arstall;
+        return dato.substring(4);
     }
 
     public String getTotKarakter() {
@@ -134,7 +143,7 @@ public class Spisested implements Comparable {
         return "Spisested{" +
                 "orgNr='" + orgNr + '\'' +
                 ", navn='" + navn + '\'' +
-                ", År='" + arstall + '\'' +
+                ", År='" + dato + '\'' +
                 '}';
     }
 

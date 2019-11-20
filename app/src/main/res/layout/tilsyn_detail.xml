@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="?android:attr/textAppearanceLarge"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TilsynDetailFragment" >
+
+    <LinearLayout
+        android:id="@+id/tema1_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tema_1"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tema1_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_weight="1"
+            android:text="@string/placeholder"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/tema1_karakter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="false"
+            android:cropToPadding="false"
+            android:src="@drawable/ic_highlight_off_blue_60dp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/tema1_listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tema1_info"/>
+
+    <LinearLayout
+        android:id="@+id/tema2_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/tema1_listView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tema_2"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tema2_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_weight="1"
+            android:text="@string/placeholder"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/tema2_karakter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="false"
+            android:cropToPadding="false"
+            android:src="@drawable/ic_highlight_off_blue_60dp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/tema2_listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tema2_info"/>
+
+    <LinearLayout
+        android:id="@+id/tema3_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/tema2_listView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tema_3"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tema3_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_weight="1"
+            android:text="@string/placeholder"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/tema3_karakter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="false"
+            android:cropToPadding="false"
+            android:src="@drawable/ic_highlight_off_blue_60dp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/tema3_listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tema3_info"/>
+
+    <LinearLayout
+        android:id="@+id/tema4_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/tema3_listView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tema_4"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tema4_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_weight="1"
+            android:text="@string/placeholder"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/tema4_karakter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="false"
+            android:cropToPadding="false"
+            android:src="@drawable/ic_highlight_off_blue_60dp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/tema4_listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tema4_info"/>
+
+
+
+
+
+
+
+
+
+
+</RelativeLayout>
