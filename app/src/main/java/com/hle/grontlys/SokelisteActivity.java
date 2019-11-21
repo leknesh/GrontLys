@@ -64,26 +64,36 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        }); */
+        });
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true); */
 
+        //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
+        if (savedInstanceState != null){
+            sokeNavn = savedInstanceState.getString("sokenavn");
+            sokePoststed = savedInstanceState.getString("sokepoststed");
+        }
         //Henter søkeresultatet fra Intent
-        Intent intent = getIntent();
-
-        if (intent != null){
-            sokeNavn = intent.getStringExtra("sokenavn");
-            Log.d(TAG, "Mottatt søkenavn: " + sokeNavn);
-
-            sokePoststed = intent.getStringExtra("sokepoststed");
-            Log.d(TAG, "Mottatt søkepoststed: " + sokePoststed);
-        }
         else {
-            Log.d(TAG, "Intent = null");
+            Intent intent = getIntent();
+
+            if (intent != null){
+                sokeNavn = intent.getStringExtra("sokenavn");
+                Log.d(TAG, "Mottatt søkenavn: " + sokeNavn);
+
+                sokePoststed = intent.getStringExtra("sokepoststed");
+                Log.d(TAG, "Mottatt søkepoststed: " + sokePoststed);
+            }
+            else {
+                Log.d(TAG, "Intent = null");
+            }
+
         }
 
+        //henter recyclerview
         recyclerView = findViewById(R.id.spisested_recyclerView);
 
+        //starter metode for datasøk
         hentSpisestedData();
 
         //setter swipemetoder. Kode hentet direkte fra forelesningsslides
@@ -102,7 +112,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
                 return true;
             }
 
-            // Sveip fjerner entries fra listen
+            // Sveip fjerner entries fra listen etter dialogpopup med ok/ikke
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 visDialog(viewHolder);
@@ -111,6 +121,16 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         });
 
         helper.attachToRecyclerView(recyclerView);
+    }
+
+    //tar vare på variabler i viewet
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        // Lagrer søkestrenger
+        savedInstanceState.putString("sokenavn", sokeNavn);
+        savedInstanceState.putString("sokepoststed", sokePoststed);
     }
 
 
@@ -155,22 +175,18 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
      */
     private void hentSpisestedData() {
 
+        //APIet godtar tomme søkefelt, bygger derfor en URL med både spisestednavn og poststed
         String URL = ENDPOINT + KOL_NAVN + "=" + sokeNavn
                         + "&" + KOL_POSTSTED + "=" + sokePoststed;
 
-        /*if (!sokeNavn.isEmpty()){
-            URL += KOL_NAVN + "=" + sokeNavn;
-        }
-        else if (!sokePoststed.isEmpty()) {
-            URL += KOL_POSTSTED + "=" + sokePoststed;
-        }*/
+        Log.d(TAG, URL);
 
         //henter resultat asynkront vhja Volley
         if (isOnline()){
             RequestQueue queue = Volley.newRequestQueue(this);
             StringRequest stringRequest = new StringRequest(Request.Method.GET, URL, this, this);
             queue.add(stringRequest);
-            Log.d(TAG, URL);
+
         }
     }
 

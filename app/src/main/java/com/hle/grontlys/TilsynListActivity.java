@@ -34,11 +34,15 @@ import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
 import android.widget.Toast;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
-//@henriette: kommentarer i grønt nedenfor er autogenerert av Studio ved opprettelse av
-// master/detail workflow-mal
+//@henriette:
+// Activity som viser oversikt over alle tilsyn utført på et gitt spisested (sendt fra SokelisteActivity)
+// Spisestedobjekt som sendes hit er kun ett av tilsynene som er gjennomført på spisestedet,
+// gjør nytt oppslag i tilsynstabell for å hente full liste over tilsyn på valgte spisested.
+// TilsynsListActivity er satt opp av Android Studio som Master/detail-mal, og en del av koden og
+// kommentarene er autogenerert ved opprettelse av denne malen
+
 
 /**
  * An activity representing a list of Tilsyner. This activity
@@ -52,9 +56,9 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
     //input fra Intent
     private Spisested valgtSpisested;
-    private Tilsyn valgtTilsyn;
 
-    //lister av tilsynobjekter
+    //Tilsyn og liste av tilsynobjekter
+    private Tilsyn valgtTilsyn;
     protected ArrayList<Tilsyn> tilsynsListe = new ArrayList<>();
 
     //endpoint for CRUD-api
@@ -79,6 +83,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
+        /* Ikke implementert p.t
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,11 +92,12 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                         .setAction("Action", null).show();
             }
         });
+
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        } */
 
         if (findViewById(R.id.tilsyn_detail_container) != null) {
             // The detail container view will be present only in the
@@ -101,21 +107,36 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             mTwoPane = true;
         }
 
-        //henter inn valgt spisested fra intent
-        Intent intent = getIntent();
-        if (intent != null){
-            Log.d(TAG, "Ikke tom intent");
-            valgtSpisested = (Spisested) intent.getSerializableExtra("valgtspisested");
-            Log.d(TAG, "Valgt spisested: " + valgtSpisested.toString());
-        }
+        //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
+        if (savedInstanceState != null){
+            valgtSpisested = (Spisested) savedInstanceState.getSerializable("valgtspisested");
+         }
         else {
-            Log.d(TAG, "Tom intent");
+            //henter ellers inn valgt spisested fra intent
+            Intent intent = getIntent();
+            if (intent != null){
+                valgtSpisested = (Spisested) intent.getSerializableExtra("valgtspisested");
+                Log.d(TAG, "Valgt spisested: " + valgtSpisested.toString());
+            }
+            else {
+                Log.d(TAG, "Tom intent");
+            }
         }
 
+        //metode som legger data om spisestedet inn i viewet
         fyllSpisestedCard();
         
-        //starter datagenerering
+        //starter henting av tilsynsdata
         hentTilsynsOversikt();
+
+    }
+
+    // Lagrer valgt spisested
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putSerializable("valgtspisested", valgtSpisested);
 
     }
 
@@ -123,6 +144,32 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     /**
      * Egne metoder og utilities
      */
+
+
+    //legger info om spisestedet inn i viewet
+    private void fyllSpisestedCard() {
+
+        //View-elementer
+        TextView navnTV, orgNrTV, adresseTV, postNrTV, postStedTV, arstallTV;
+
+        //tilordning av viewelementer til layout-elementer
+        navnTV = findViewById(R.id.navn_card);
+        orgNrTV = findViewById(R.id.orgnr_card);
+        adresseTV = findViewById(R.id.adresse_card);
+        postNrTV = findViewById(R.id.postnr_card);
+        postStedTV = findViewById(R.id.poststed_card);
+        arstallTV = findViewById(R.id.dato_card);
+
+        //knytter inn data fra valgt spisested.
+        navnTV.setText(valgtSpisested.getNavn());
+        orgNrTV.setText(valgtSpisested.getOrgNr());
+        adresseTV.setText(valgtSpisested.getAdresse());
+        postNrTV.setText(valgtSpisested.getPostNr());
+        postStedTV.setText(valgtSpisested.getPostSted());
+        arstallTV.setText("");
+
+    }
+
 
     //henter ut oversiktsdata fra tilsynstabell for gjeldende spisested
     private void hentTilsynsOversikt() {
@@ -136,6 +183,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             queue.add(stringRequest);
         }
     }
+
 
     @Override
     public void onResponse(String response) {
@@ -168,29 +216,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                 Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Oppbygging av activity-view
-     */
 
-    private void fyllSpisestedCard() {
-
-        TextView navnTV, orgNrTV, adresseTV, postNrTV, postStedTV, arstallTV;
-
-        navnTV = findViewById(R.id.navn_card);
-        orgNrTV = findViewById(R.id.orgnr_card);
-        adresseTV = findViewById(R.id.adresse_card);
-        postNrTV = findViewById(R.id.postnr_card);
-        postStedTV = findViewById(R.id.poststed_card);
-        arstallTV = findViewById(R.id.dato_card);
-
-        navnTV.setText(valgtSpisested.getNavn());
-        orgNrTV.setText(valgtSpisested.getOrgNr());
-        adresseTV.setText(valgtSpisested.getAdresse());
-        postNrTV.setText(valgtSpisested.getPostNr());
-        postStedTV.setText(valgtSpisested.getPostSted());
-        arstallTV.setText("");
-
-    }
 
 
     /**
@@ -215,13 +241,15 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     }
 
     private void setupRecyclerView(RecyclerView recyclerView) {
-        Log.d(TAG, "SetupRecyclerView: " + tilsynsListe.size());
+
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, tilsynsListe, mTwoPane));
     }
 
     /**
-     * Autogenerert kode for oppbygging av Master/detail workflow,
-     * supplert med de rette variabler og klasser
+     * Autogenerert kode for oppbygging av Master/detail workflow views,
+     * supplert med de rette variabler og klasser.
+     * Activity og fragment kjøres forskjellig her avhengig av skjermstørrelse.
+     * Valgt tilsyn sendes med i begge tilfeller.
      */
 
     public class SimpleItemRecyclerViewAdapter
@@ -233,9 +261,14 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Tilsyn tilsyn = (Tilsyn) view.getTag();
-                Log.d(TAG, "OnClick - klikket, valgt tilsyn: " + valgtTilsyn.getDato() );
 
+
+                //set og get tag metoder i viewklassen, sørger for tilordning av klikket element
+                //Tilsyn valgtTilsyn = (Tilsyn) view.getTag();
+
+                Log.d(TAG, "Valgt tilsyn: " + valgtTilsyn.toString() );
+
+                //hvis stor skjerm/tablet kjøres activity og fragment i samme view
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putSerializable("valgtTilsyn", valgtTilsyn);
@@ -244,11 +277,11 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                     mParentActivity.getSupportFragmentManager().beginTransaction()
                             .replace(R.id.tilsyn_detail_container, fragment)
                             .commit();
+                //ved liten skjerm startes først activity, deretter fragment fra activityen
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, TilsynDetailActivity.class);
                     intent.putExtra("valgtTilsyn", valgtTilsyn);
-                    Log.d(TAG, "Extra er puttet, id:  " + valgtTilsyn.getTilsynId());
 
                     context.startActivity(intent);
                 }

@@ -14,12 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+/**
+*Klasse for opprettelse av spisested-cardviews
+ */
 public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.SpisestedViewHolder> {
 
     //logtag
     private static final String TAG = "JsonLog";
 
-    private ArrayList<Spisested> spisestedListe = new ArrayList<>();
+    private ArrayList<Spisested> spisestedListe;
     private Context mContext;
 
     SpisestedAdapter(Context context, ArrayList<Spisested> spisestedListe) {
@@ -48,6 +51,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
     class SpisestedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        //views i et card
         private TextView orgNrTextView;
         private TextView navnTextView;
         private TextView adresseTextView;
@@ -60,6 +64,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
             super(itemView);
 
+            //tilordner views til layoutelementer
             navnTextView = itemView.findViewById(R.id.navn_card);
             orgNrTextView = itemView.findViewById(R.id.orgnr_card);
             adresseTextView = itemView.findViewById(R.id.adresse_card);
@@ -71,6 +76,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
             itemView.setOnClickListener(this);
         }
 
+        //legger data inn i views
         void bindTo(Spisested spisestedet) {
             navnTextView.setText(spisestedet.getNavn());
             orgNrTextView.setText("Org.nr: " + spisestedet.getOrgNr());
@@ -79,6 +85,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
             postStedTextView.setText(spisestedet.getPostSted());
             datoTextView.setText(spisestedet.getArstall());
 
+            //Velger bilde på basis av totalkarakter for tilsynet
             //ref karakterskala beskrevet her: https://data.norge.no/data/mattilsynet/smilefjestilsyn-p%C3%A5-serveringssteder
             switch (spisestedet.getTotKarakter()) {
                 case "0":

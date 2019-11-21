@@ -1,5 +1,7 @@
 package com.hle.grontlys;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -157,4 +159,5 @@ public class Spisested implements Comparable, Serializable {
         else
             return -1;
     }
+
 }
