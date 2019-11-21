@@ -8,6 +8,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,21 +24,16 @@ import android.view.MenuItem;
  */
 public class TilsynDetailActivity extends AppCompatActivity {
 
+    //logtag
+    private static final String TAG = "JsonLog";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tilsyn_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -60,8 +56,10 @@ public class TilsynDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             Intent intent = getIntent();
             Tilsyn valgtTilsyn = (Tilsyn) intent.getSerializableExtra("valgtTilsyn");
+            Log.d(TAG, "TilsynDetailActivity har mottatt tilsyn: " + valgtTilsyn.getTilsynId());
 
-            arguments.putSerializable("valgtTilsyn", valgtTilsyn);;
+            arguments.putSerializable("valgtTilsyn", valgtTilsyn);
+            Log.d(TAG, "Arguments.putSerializable" + valgtTilsyn.getTilsynId());
 
             TilsynDetailFragment fragment = new TilsynDetailFragment();
             fragment.setArguments(arguments);

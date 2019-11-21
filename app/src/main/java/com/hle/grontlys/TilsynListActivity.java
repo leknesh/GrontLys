@@ -54,12 +54,8 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     private Spisested valgtSpisested;
     private Tilsyn valgtTilsyn;
 
-    //lister av tilsyn- og tilsynsdetaljobjekter
+    //lister av tilsynobjekter
     protected ArrayList<Tilsyn> tilsynsListe = new ArrayList<>();
-   //private HashMap<String, Tilsyn> tilsynsHashMap = new HashMap<String, Tilsyn>();
-
-    //view til listen
-    private View recyclerView;
 
     //endpoint for CRUD-api
     private static final String ENDPOINT_TILSYN =
@@ -138,26 +134,21 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             RequestQueue queue = Volley.newRequestQueue(this);
             StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_tilsyn, this, this);
             queue.add(stringRequest);
-
         }
     }
 
     @Override
     public void onResponse(String response) {
 
-        Log.d(TAG, response);
         //bygger liste av tilsyn ved respons
         tilsynsListe = Tilsyn.listTilsyn(response);
         Log.d(TAG, "Tilsynsliste: " + tilsynsListe.size());
-        //tilsynsHashMap = (HashMap<String, Tilsyn>) Tilsyn.lagTilsynHashMap(tilsynsListe);
-        //Log.d(TAG, "HashmapStørrelse: " + tilsynsHashMap.size());
 
-        recyclerView = findViewById(R.id.tilsyn_list);
+        //view til listen
+        View recyclerView = findViewById(R.id.tilsyn_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
     }
-
-
 
     @Override
     public void onErrorResponse(VolleyError error) {
@@ -257,7 +248,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                     Context context = view.getContext();
                     Intent intent = new Intent(context, TilsynDetailActivity.class);
                     intent.putExtra("valgtTilsyn", valgtTilsyn);
-                    Log.d(TAG, "Extra er puttet");
+                    Log.d(TAG, "Extra er puttet, id:  " + valgtTilsyn.getTilsynId());
 
                     context.startActivity(intent);
                 }

@@ -6,16 +6,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 //Klassen extender spisested, og benyttes for visning av hvert enkelt tilsynsobjekt
-public class Tilsyn extends Spisested {
+public class Tilsyn extends Spisested implements Serializable {
 
     private String tilsynId;
 
     private ArrayList<Temaresultat> tilsynResultater;
-
-
 
     private static final String KOL_TILSYNID    = "tilsynid";
     private static final String KOL_KARAKTER1   = "karakter1";
@@ -107,7 +106,7 @@ public class Tilsyn extends Spisested {
 
 
     //indre klasse for å bygge arrayliste av resultater
-    public class Temaresultat {
+    public class Temaresultat implements Serializable {
         private String temanavn;
         private String temakarakter;
 

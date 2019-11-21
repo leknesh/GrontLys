@@ -20,7 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -29,11 +31,11 @@ import java.util.ArrayList;
  * @henriette:
  *
  * Koden her er basert på Android Studio sin Master/detail-mal
- * PLUSS kode hentet fra eksempler på expandableList:
+ * PLUSS kode hentet fra to eksempler på expandableList:
  * https://stackoverflow.com/questions/24083886/expandablelistview-in-fragment-issue
  * https://androidexample.com/Custom_Expandable_ListView_Tutorial_-_Android_Example/index.php?view=article_discription&aid=107&aaid=129
- * Kode fra dette eksemplet er beholdt med sine opprinnelige variabelnavn der det
- * er mulig, f.ex children, groups, rootView, lv //
+ * Kode fra eksempler er beholdt med sine opprinnelige variabelnavn der det
+ * er mulig, f.ex children, groups, rootView, expListView //
  */
 
 /**
@@ -51,7 +53,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     private Tilsyn valgtTilsyn;
 
     //liste fylles med alle vurderte tilsynsdetaljobjekter for dette tilsynet
-    private ArrayList<TilsynsDetalj> detaljListe;
+    private ArrayList<TilsynsDetalj> detaljListe = new ArrayList<>();
 
     //endpoint for CRUD-api
     private static final String ENDPOINT_DETALJ =
@@ -61,7 +63,8 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     private static final String TAG = "JsonLog";
 
     View rootView;
-    ExpandableListView lv;
+    ExpandableListView expListView;
+    MyExpandableListAdapter listAdapter;
     private Context mContext;
 
 
@@ -82,40 +85,37 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         //henter ut det valgte tilsynsobjektet
         assert getArguments() != null;
         valgtTilsyn = (Tilsyn) getArguments().getSerializable("valgtTilsyn");
+        Log.d(TAG, "Fragment mottatt valgtTilsyn: " + valgtTilsyn.getTilsynId());
 
         //starter metode for uthenting av tilsynsdetaljdata for gjeldende tilsynsId
         assert valgtTilsyn != null;
         hentTilsynsdetaljer(valgtTilsyn.getTilsynId());
 
-        //setter opp hovedvindu (kode satt opp av master/detail-mal)
+        //setter opp hovedvindu med toolbar (kode satt opp av master/detail-mal)
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
-            appBarLayout.setTitle(valgtTilsyn.getNavn() + "/n" + valgtTilsyn.getDato());
+            appBarLayout.setTitle(valgtTilsyn.getNavn() + "\n" + valgtTilsyn.getDato());
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.tilsyn_detail, container, false);
+        rootView = inflater.inflate(R.layout.tilsyn_detail, null);
+        expListView = (ExpandableListView) rootView.findViewById(R.id.expListView);
 
         return rootView;
     }
 
-    //kode hentet fra Listview-eksempel
-    //https://stackoverflow.com/questions/24083886/expandablelistview-in-fragment-issue
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        lv = (ExpandableListView) view.findViewById(R.id.expListView);
-        lv.setAdapter(new MyExpandableListAdapter(mContext, valgtTilsyn, detaljListe));
-        lv.setGroupIndicator(null);
-
     }
 
-
+    //Starter henting av data fra kravpunkttabell fror valgt tilsynsid via volley
     private void hentTilsynsdetaljer(String tilsynId) {
 
         String URL = ENDPOINT_DETALJ + tilsynId;
@@ -129,17 +129,37 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
     }
 
+    //Svar på volleyrequest starter metode som genererer lister og listview
     @Override
     public void onResponse(String response) {
 
         Log.d(TAG, "DetaljVolleyrespons: " + response);
-        detaljListe = TilsynsDetalj.listTilsynsDetaljer(response);
 
+        bearbeidRespons(response);
     }
+
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        displayToast("Problemer med innhenting av data!");
+    }
 
+    //Metode som genererer resultatliste fra JSONrespons, oppretter expandablelistview og
+    // tilhørende adapter
+    private void bearbeidRespons(String response) {
+
+        //henter alle entries i kravliste-tabell for dette tilsynet
+        detaljListe = TilsynsDetalj.listTilsynsDetaljer(response);
+
+        //genererer liste av temaresultat-objekter fra tilsyn-tabellen (<Temanavn, Temakarakter>)
+        ArrayList<Tilsyn.Temaresultat> temaResultater = valgtTilsyn.getTilsynResultater();
+
+        //henter inn expandablelist
+        expListView = rootView.findViewById(R.id.expListView);
+
+        //setter opp adapter som fyller expandableList med innhold
+        expListView.setAdapter(new MyExpandableListAdapter(mContext, temaResultater, detaljListe));
+        expListView.setGroupIndicator(null);
     }
 
 
@@ -148,6 +168,12 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Activity.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    //viser toastmelding med valgt tekstinput
+    public void displayToast(String message) {
+        Toast.makeText(mContext, message,
+                Toast.LENGTH_SHORT).show();
     }
 
 

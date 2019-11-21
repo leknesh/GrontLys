@@ -91,6 +91,11 @@ public class TilsynsDetalj {
         return childRows;
     }
 
+    @Override
+    public String toString(){
+        return "Tilsyndetaljid: " + tilsynDetaljId;
+    }
+
 
     /******************************
      * Gettere og settere

@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="8dp">
 
     <TextView
         android:id="@+id/detalj_punktnavn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:text="@string/placeholder"/>
+        android:layout_toStartOf="@id/detalj_karakter"
+        android:text="@string/placeholder"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/detalj_forklaring"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/detalj_punktnavn"
         android:layout_toStartOf="@id/detalj_karakter"
-        android:text="@string/placeholder_long"/>
+        android:text="@string/placeholder_long" />
 
     <ImageView
         android:id="@+id/detalj_karakter"
@@ -26,8 +28,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_margin="8dp"
-        android:src="@drawable/ic_sentiment_neutral_yellow_24dp"/>
-
-
+        android:src="@drawable/ic_sentiment_neutral_yellow_24dp"
+        android:contentDescription="@string/karaktervisning" />
 
 </RelativeLayout>
