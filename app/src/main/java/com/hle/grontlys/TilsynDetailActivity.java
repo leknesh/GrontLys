@@ -37,9 +37,9 @@ public class TilsynDetailActivity extends AppCompatActivity {
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
+        /*if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        } */
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -54,19 +54,21 @@ public class TilsynDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            Intent intent = getIntent();
-            Tilsyn valgtTilsyn = (Tilsyn) intent.getSerializableExtra("valgtTilsyn");
-            Log.d(TAG, "TilsynDetailActivity har mottatt tilsyn: " + valgtTilsyn.getTilsynId());
+            arguments.putString(TilsynDetailFragment.ARG_ITEM_ID,
+                    getIntent().getStringExtra(TilsynDetailFragment.ARG_ITEM_ID));
 
-            arguments.putSerializable("valgtTilsyn", valgtTilsyn);
-            Log.d(TAG, "Arguments.putSerializable" + valgtTilsyn.getTilsynId());
+            Log.d(TAG, "Arguments puttet: " + arguments.getString(TilsynDetailFragment.ARG_ITEM_ID));
 
             TilsynDetailFragment fragment = new TilsynDetailFragment();
             fragment.setArguments(arguments);
+
+            Log.d(TAG, "Arguments satt ");
+
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.tilsyn_detail_container, fragment)
                     .commit();
         }
+
     }
 
     @Override

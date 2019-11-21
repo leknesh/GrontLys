@@ -34,7 +34,7 @@ import java.util.Collections;
 
 public class SokelisteActivity extends AppCompatActivity implements Response.Listener<String>, Response.ErrorListener {
 
-    private String sokeNavn, sokePoststed;
+    private String sokeNavn, sokePoststed, arstall;
 
     private RecyclerView recyclerView;
     private ArrayList<Spisested> spisestedListe = new ArrayList<>();
@@ -56,22 +56,12 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /* Ikke implementert p.t
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); */
 
         //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
         if (savedInstanceState != null){
             sokeNavn = savedInstanceState.getString("sokenavn");
             sokePoststed = savedInstanceState.getString("sokepoststed");
+            arstall = savedInstanceState.getString("arstall");
         }
         //Henter søkeresultatet fra Intent
         else {
@@ -83,6 +73,10 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
                 sokePoststed = intent.getStringExtra("sokepoststed");
                 Log.d(TAG, "Mottatt søkepoststed: " + sokePoststed);
+
+                arstall = intent.getStringExtra("arstall");
+                Log.d(TAG, "Mottatt årstall: " + arstall);
+
             }
             else {
                 Log.d(TAG, "Intent = null");
@@ -131,6 +125,21 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         // Lagrer søkestrenger
         savedInstanceState.putString("sokenavn", sokeNavn);
         savedInstanceState.putString("sokepoststed", sokePoststed);
+        savedInstanceState.putString("arstall", arstall);
+    }
+
+    // På retur hit fra TilsynListActivity trenger det å nullstille static tilsynslistevariabler
+    // fra Tilsyn-objekt, ellers henger liste og hashmap igjen til neste runde
+    //Disse listene er konstante så lenge samme spisested er aktivt.
+    @Override
+    public void onResume() {
+
+        super.onResume();
+
+        Tilsyn.ITEM_MAP.clear();
+        Tilsyn.ITEMS.clear();
+
+
     }
 
 
@@ -176,6 +185,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
     private void hentSpisestedData() {
 
         //APIet godtar tomme søkefelt, bygger derfor en URL med både spisestednavn og poststed
+        //Årstall må evt sorteres ut etter mottatt respons
         String URL = ENDPOINT + KOL_NAVN + "=" + sokeNavn
                         + "&" + KOL_POSTSTED + "=" + sokePoststed;
 
@@ -192,8 +202,28 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     @Override
     public void onResponse(String response) {
-        spisestedListe = Spisested.listSpisesteder(response);
+        ArrayList<Spisested> liste = Spisested.listSpisesteder(response);
 
+        bearbeidListe(liste);
+
+    }
+
+    private void bearbeidListe(ArrayList<Spisested> liste) {
+
+        //dersom man har valgt et årstall må dette sorteres ut
+        if (!arstall.equals("Alle")){
+
+            //itererer igjennom listen og henter ut valgte årstall
+            for (Spisested s : liste) {
+                if (s.getArstall().equals(arstall)){
+                    spisestedListe.add(s);
+                }
+            }
+
+            //årstall = alle
+        } else {
+            spisestedListe = liste;
+        }
 
         if (spisestedListe.size() == 0){
             finish();
@@ -203,7 +233,9 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         else {
             genererListeView();
         }
+
     }
+
 
     private void genererListeView() {
         Collections.sort(spisestedListe);

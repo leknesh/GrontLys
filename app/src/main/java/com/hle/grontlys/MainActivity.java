@@ -11,8 +11,10 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 
@@ -22,7 +24,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText navnEditText, poststedEditText;
-    private String sokeNavn, sokePoststed;
+    private Spinner arstallSpinner;
+    private String sokeNavn, sokePoststed, arstall;
     private ArrayList<Spisested> spisestedListe= new ArrayList<>();
 
 
@@ -36,8 +39,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //setter opp view-variabler
         navnEditText = findViewById(R.id.spisested_sokenavn);
         poststedEditText = findViewById(R.id.poststed_sokenavn);
+
+        arstallSpinner = findViewById(R.id.arstall_spinner);
+        byggSpinner();
 
         Button sokeKnapp = findViewById(R.id.sok_knapp);
         sokeKnapp.setOnClickListener(this);
@@ -45,19 +52,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button visHerKnapp = findViewById(R.id.vis_her_knapp);
         visHerKnapp.setOnClickListener(this);
 
-        /* Foreløpig ikke i bruk
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        }); */
+
+
+    }
+
+    private void byggSpinner() {
+        final String[] ARSTALL = {"Alle", "2020", "2019", "2018", "2017", "2016"};
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, ARSTALL );
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        arstallSpinner.setAdapter(spinnerAdapter);
     }
 
 
-        @Override
+    @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.sok_knapp:
@@ -71,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void startSpisestedSok() {
         sokeNavn        = navnEditText.getText().toString();
         sokePoststed    = poststedEditText.getText().toString();
+        arstall = arstallSpinner.getSelectedItem().toString();
 
         //lar ikke bruker hente hele datasettet
         if (sokeNavn.isEmpty() && sokePoststed.isEmpty()){
@@ -80,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this, SokelisteActivity.class);
             intent.putExtra("sokenavn", sokeNavn);
             intent.putExtra("sokepoststed", sokePoststed);
+            intent.putExtra("arstall", arstall);
 
             startActivity(intent);
         }

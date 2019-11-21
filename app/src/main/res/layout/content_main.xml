@@ -84,11 +84,38 @@
             android:id="@+id/poststed_sokenavn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
+            android:paddingTop="16dp"
             android:ems="10"
             android:inputType="text"
             android:hint="@string/sok_poststed"
             android:layout_below="@id/spisested_sokenavn" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp"
+                android:text="Velg årstall"
+                android:textSize="14sp" />
+
+            <Spinner
+                android:id="@+id/arstall_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp"
+                android:spinnerMode="dialog" />
+
+
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/sok_knapp"

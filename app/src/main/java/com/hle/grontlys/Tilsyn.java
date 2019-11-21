@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 //Klassen extender spisested, og benyttes for visning av hvert enkelt tilsynsobjekt
 public class Tilsyn extends Spisested implements Serializable {
@@ -27,6 +29,10 @@ public class Tilsyn extends Spisested implements Serializable {
     private static String kol_tema2  = "tema2_no";
     private static String kol_tema3  = "tema3_no";
     private static String kol_tema4  = "tema4_no";
+
+    //hashmap til bruk for master/detail workflow setup
+    public static final Map<String, Tilsyn> ITEM_MAP = new HashMap<>();
+    public static final ArrayList<Tilsyn> ITEMS = new ArrayList<>();
 
     //logtag
     private static final String TAG = "JsonLog";
@@ -58,9 +64,9 @@ public class Tilsyn extends Spisested implements Serializable {
 
     //Metode som bygger liste over tilsyn ut fra JSON-respons.
     // Responsen vil komme etter nytt Volley-søk med spesifikk tilsynsobjektId, dvs kun ett spisested
-    public static ArrayList<Tilsyn> listTilsyn(String response) {
+    public static void listTilsyn(String response) {
 
-        ArrayList<Tilsyn> tilsynsListe = new ArrayList<>();
+
         //henter ut array av jsonobjekter
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -70,16 +76,35 @@ public class Tilsyn extends Spisested implements Serializable {
             for (int i=0; i<jsonArray.length(); i++){
                 Tilsyn tilsyn = new Tilsyn(jsonArray.getJSONObject(i));
 
+                //legger forekomsten inn i listene
+                ITEM_MAP.put(tilsyn.tilsynId, tilsyn);
+                ITEMS.add(tilsyn);
+
                 Log.d(TAG, tilsyn.toString());
-                tilsynsListe.add(tilsyn);
+                //tilsynsListe.add(tilsyn);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d(TAG, "JSONException Tilsyn");
         }
-        return tilsynsListe;
+        //return tilsynsListe;
     }
+
+    /*Metode som bygger hashmap over tilsyn ut fra Arraylisten.
+    // Trengs i oppsettet av master/detail flow.
+    public static HashMap<String, Tilsyn> lagTilsynHashMap(ArrayList<Tilsyn> liste) {
+
+        HashMap<String, Tilsyn> ITEM_MAP = new HashMap<>();
+
+        //itererer arraylisten og legger til i hashmap med tilsynId som nøkkel
+
+        for (Tilsyn t : liste) {
+            ITEM_MAP.put(t.tilsynId, t);
+        }
+
+        return ITEM_MAP;
+    } */
 
 
     @Override

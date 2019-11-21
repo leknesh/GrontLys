@@ -15,6 +15,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +49,11 @@ import java.util.ArrayList;
 
 public class TilsynDetailFragment extends Fragment implements Response.ErrorListener, Response.Listener<String> {
 
+    /**
+     * The fragment argument representing the item ID that this fragment
+     * represents.
+     */
+    public static final String ARG_ITEM_ID = "item_id";
 
     //Tilsynsobjekt som sendes inn i fragmentet
     private Tilsyn valgtTilsyn;
@@ -82,14 +88,23 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
         mContext = getContext();
 
-        //henter ut det valgte tilsynsobjektet
         assert getArguments() != null;
+        if (getArguments().containsKey(ARG_ITEM_ID)){
+
+            Log.d(TAG, "Fragment, args mottatt , item map size = " + Tilsyn.ITEM_MAP.size());
+            valgtTilsyn = Tilsyn.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            Log.d(TAG, "Fragment, args mottatt " + valgtTilsyn.getTilsynId());
+        }
+
+        /*henter ut det valgte tilsynsobjektet
+
         valgtTilsyn = (Tilsyn) getArguments().getSerializable("valgtTilsyn");
-        Log.d(TAG, "Fragment mottatt valgtTilsyn: " + valgtTilsyn.getTilsynId());
+        Log.d(TAG, "Fragment mottatt valgtTilsyn: " + valgtTilsyn.getTilsynId()); */
 
         //starter metode for uthenting av tilsynsdetaljdata for gjeldende tilsynsId
         assert valgtTilsyn != null;
         hentTilsynsdetaljer(valgtTilsyn.getTilsynId());
+
 
         //setter opp hovedvindu med toolbar (kode satt opp av master/detail-mal)
         Activity activity = this.getActivity();
@@ -102,7 +117,8 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.tilsyn_detail, null);
+        rootView = inflater.inflate(R.layout.tilsyn_detail, container, false);
+
         expListView = (ExpandableListView) rootView.findViewById(R.id.expListView);
 
         return rootView;
@@ -137,6 +153,8 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
         bearbeidRespons(response);
     }
+
+
 
 
     @Override

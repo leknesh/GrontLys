@@ -34,6 +34,7 @@ import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
 import android.widget.Toast;
 import java.util.ArrayList;
+import java.util.List;
 
 
 //@henriette:
@@ -59,7 +60,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
     //Tilsyn og liste av tilsynobjekter
     private Tilsyn valgtTilsyn;
-    protected ArrayList<Tilsyn> tilsynsListe = new ArrayList<>();
+    //protected ArrayList<Tilsyn> tilsynsListe = new ArrayList<>();
 
     //endpoint for CRUD-api
     private static final String ENDPOINT_TILSYN =
@@ -188,9 +189,12 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     @Override
     public void onResponse(String response) {
 
-        //bygger liste av tilsyn ved respons
-        tilsynsListe = Tilsyn.listTilsyn(response);
-        Log.d(TAG, "Tilsynsliste: " + tilsynsListe.size());
+        //bygger liste og hashmap av tilsyn ved respons
+        Tilsyn.listTilsyn(response);
+
+        //sjekk av status på liste/hashmap
+        Log.d(TAG, "Tilsynsliste: " + Tilsyn.ITEMS.size()
+            + ", tilsynshashmap: " + Tilsyn.ITEM_MAP.size());
 
         //view til listen
         View recyclerView = findViewById(R.id.tilsyn_list);
@@ -242,7 +246,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
     private void setupRecyclerView(RecyclerView recyclerView) {
 
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, tilsynsListe, mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, Tilsyn.ITEMS, mTwoPane));
     }
 
     /**
@@ -256,22 +260,21 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final TilsynListActivity mParentActivity;
-        private final ArrayList<Tilsyn> mValues;
+        private final List<Tilsyn> mValues;
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-
                 //set og get tag metoder i viewklassen, sørger for tilordning av klikket element
-                //Tilsyn valgtTilsyn = (Tilsyn) view.getTag();
+                Tilsyn tilsyn = (Tilsyn) view.getTag();
 
-                Log.d(TAG, "Valgt tilsyn: " + valgtTilsyn.toString() );
+                Log.d(TAG, "Valgt tilsyn: " + tilsyn.toString() );
 
                 //hvis stor skjerm/tablet kjøres activity og fragment i samme view
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putSerializable("valgtTilsyn", valgtTilsyn);
+                    arguments.putString(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
                     TilsynDetailFragment fragment = new TilsynDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -281,18 +284,18 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, TilsynDetailActivity.class);
-                    intent.putExtra("valgtTilsyn", valgtTilsyn);
-
+                    intent.putExtra(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
+                    Log.d(TAG, "Extra puttet: "+ tilsyn.getTilsynId());
                     context.startActivity(intent);
                 }
             }
         };
 
         SimpleItemRecyclerViewAdapter(TilsynListActivity parent,
-                                      ArrayList<Tilsyn> tilsynsListe,
+                                      List<Tilsyn> items,
                                       boolean twoPane) {
-            Log.d(TAG, "SimpleRecyclerViewAdapter: " + tilsynsListe.size());
-            mValues = tilsynsListe;
+            Log.d(TAG, "SimpleRecyclerViewAdapter: " + items.size());
+            mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
@@ -308,9 +311,9 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            valgtTilsyn = tilsynsListe.get(position);
-            String karakter = tilsynsListe.get(position).getTotKarakter();
-            String datoText = getString(R.string.tilsynsdato) + tilsynsListe.get(position).getDato();
+            valgtTilsyn = mValues.get(position);
+            String karakter = Tilsyn.ITEMS.get(position).getTotKarakter();
+            String datoText = getString(R.string.tilsynsdato) + Tilsyn.ITEMS.get(position).getDato();
 
             Log.d(TAG, "OnBindViewHolder datotekst:" + datoText);
 
@@ -335,7 +338,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
             Log.d(TAG, "Switch på karakter ok, kar " + karakter);
 
-            //holder.itemView.setTag(tilsynsListe.get(position).getKarakter1());
+            holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
         }
 
@@ -354,8 +357,8 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             ViewHolder(View view) {
                 super(view);
                 Log.d(TAG, "ViewHolder: ");
-                mDatoView = (TextView) view.findViewById(R.id.dato_tilsynlist);
-                mKarakterView = (ImageView) view.findViewById(R.id.karakter_tilsynList);
+                mDatoView = view.findViewById(R.id.dato_tilsynlist);
+                mKarakterView = view.findViewById(R.id.karakter_tilsynList);
             }
         }
     }
