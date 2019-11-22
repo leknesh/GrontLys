@@ -30,6 +30,7 @@ public class Tilsyn extends Spisested implements Serializable {
     private static String kol_tema3  = "tema3_no";
     private static String kol_tema4  = "tema4_no";
 
+
     //hashmap til bruk for master/detail workflow setup
     public static final Map<String, Tilsyn> ITEM_MAP = new HashMap<>();
     public static final ArrayList<Tilsyn> ITEMS = new ArrayList<>();
@@ -43,6 +44,14 @@ public class Tilsyn extends Spisested implements Serializable {
 
         //denne gir navn/adr/totalkarakter mm
         super(jsonObject);
+
+        //bruker andre kolonnebetegnelser hvis nynorsk er valgt
+        if (MainActivity.brukNynorsk){
+            kol_tema1 = "tema1_nn";
+            kol_tema2 = "tema2_nn";
+            kol_tema3 = "tema3_nn";
+            kol_tema4 = "tema4_nn";
+        }
 
         //henter ut tilsynsId, temanavn og tilhørende karakter
         this.tilsynId = jsonObject.optString(KOL_TILSYNID);
@@ -65,6 +74,7 @@ public class Tilsyn extends Spisested implements Serializable {
     //Metode som bygger liste over tilsyn ut fra JSON-respons.
     // Responsen vil komme etter nytt Volley-søk med spesifikk tilsynsobjektId, dvs kun ett spisested
     public static void listTilsyn(String response) {
+
 
 
         //henter ut array av jsonobjekter

@@ -3,15 +3,26 @@ package com.hle.grontlys;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.widget.SpinnerAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 
-public class Spisested implements Comparable, Serializable {
+import static java.lang.Integer.parseInt;
+
+public class Spisested implements Serializable, Comparable<Spisested> {
 
     private String orgNr;
     private String navn;
@@ -81,11 +92,25 @@ public class Spisested implements Comparable, Serializable {
         return objektId;
     }
 
-    public String getDato() {
+    public String getDatoTekst() {
 
         return dato.substring(0,2)
                 + "." + dato.substring(2,4)
                 + "." + dato.substring(4);
+    }
+
+    public Date getDato(){
+        DateFormat df = new SimpleDateFormat("ddMMyyyy");
+
+        //initierer datovariabel med dagens dato
+        Date date = new Date();
+
+        try {
+            date = df.parse(dato);
+        } catch (ParseException pe){
+            Log.d(TAG, "Datoproblem: " + dato);
+        }
+        return date;
     }
 
     public String getArstall() {
@@ -101,44 +126,74 @@ public class Spisested implements Comparable, Serializable {
      *
      */
 
-    //Metode som bygger liste over INDIVIDUELLE spisesteder ut fra JSON-respons
-
+    //metode som bygger arrayliste av jsonRespons
     public static ArrayList<Spisested> listSpisesteder(String response) {
-
-        ArrayList<Spisested> spisesteder = new ArrayList<>();
+        ArrayList<Spisested> liste = new ArrayList<>();
         //henter ut array av jsonobjekter
         try {
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("entries");
 
             //løper igjennom arrayet ooppretter spisesteder
-            for (int i=0; i<jsonArray.length(); i++){
+            for (int i = 0; i < jsonArray.length(); i++) {
                 Spisested spisested = new Spisested(jsonArray.getJSONObject(i));
-
-                //ønsker KUN individuelle spisesteder i denne omgang, sorterer på ObjektId
-                if (!spisesteder.contains(spisested)){
-
-                    Log.d(TAG, spisested.toString());
-                    spisesteder.add(spisested);
-                }
+                liste.add(spisested);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d(TAG, "JSONException");
         }
-        return spisesteder;
+        return liste;
+    }
+
+    //Metode som fletter to lister og henter ut INDIVIDUELLE spisesteder
+
+    public  static ArrayList<Spisested> hentIndividuelle(ArrayList<Spisested> liste) {
+
+        HashMap<String, Spisested> spisestedHashMap = new HashMap<>();
+
+        //legger in ett objekt for å kunne starte sammenlikning.
+        spisestedHashMap.put(liste.get(0).getObjektId(), liste.get(0));
+
+        for (Spisested s: liste){
+            //hvis hashmap inneholder denne objektId fra før
+            if (spisestedHashMap.containsKey(s.getObjektId())){
+                //hent inn objektet fra hashmap
+                Spisested funn = spisestedHashMap.get(s.getObjektId());
+                //hvis listeobjekt er av nyere årgang enn det som ligger i hashmap skal
+                //funn i hashmap erstattes med listeobjektet
+                if (s.getDato().after(funn.getDato())){
+                    spisestedHashMap.remove(funn.getObjektId(), funn);
+                    spisestedHashMap.put(s.getObjektId(), s);
+                }
+            }
+            else {
+                //hashmap har ikke denne ID fra før
+                spisestedHashMap.put(s.getObjektId(), s);
+            }
+        }
+
+        Collection<Spisested> values = spisestedHashMap.values();
+        ArrayList<Spisested> resultat = new ArrayList<Spisested>(values);
+
+        return resultat;
+
     }
 
 
-    //brukes for sjekk av om et orgnummer finnes i gjeldende treffliste
+
+
+
+
+    /*brukes for sjekk av om et orgnummer finnes i gjeldende treffliste
     @Override
     public boolean equals(Object o){
         Spisested s = (Spisested) o;
 
         return (this.objektId.equals(s.getObjektId()));
 
-    }
+    } */
 
     @Override
     public String toString() {
@@ -149,8 +204,9 @@ public class Spisested implements Comparable, Serializable {
                 '}';
     }
 
-    @Override
-    public int compareTo(Object o) {
+
+   @Override
+    public int compareTo(Spisested o) {
         Spisested s = (Spisested) o;
         if (navn.equals(s.getNavn()))
             return 0;

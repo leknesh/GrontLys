@@ -38,6 +38,12 @@ public class TilsynsDetalj {
         this.temaId             = jsonObject.optString(KOL_TEMAID).substring(0,1);
         this.punktKarakter      = jsonObject.optString(KOL_KARAKTER);
 
+        //bruker andre kolonnebetegnelser hvis nynorsk er valgt
+        if (MainActivity.brukNynorsk) {
+            kol_punktNavn       = "kravpunktnavn_nn";
+            kol_punktForklaring = "tekst_nn";
+        }
+
         //kan legge inn if/else mot en lagret målform-preference!!!
         this.punktNavn          = jsonObject.optString(kol_punktNavn);
         this.punktForklaring    = jsonObject.optString(kol_punktForklaring);

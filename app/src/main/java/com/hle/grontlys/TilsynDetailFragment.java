@@ -15,13 +15,11 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -110,7 +108,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
-            appBarLayout.setTitle(valgtTilsyn.getNavn() + "\n" + valgtTilsyn.getDato());
+            appBarLayout.setTitle(valgtTilsyn.getNavn() + "\n" + valgtTilsyn.getDatoTekst());
         }
     }
 

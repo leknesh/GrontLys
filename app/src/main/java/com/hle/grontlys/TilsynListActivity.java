@@ -18,8 +18,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,11 +27,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.app.NavUtils;
-import androidx.appcompat.app.ActionBar;
 
 import android.view.MenuItem;
 import android.widget.Toast;
-import java.util.ArrayList;
+
 import java.util.List;
 
 
@@ -313,7 +310,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         public void onBindViewHolder(final ViewHolder holder, int position) {
             valgtTilsyn = mValues.get(position);
             String karakter = Tilsyn.ITEMS.get(position).getTotKarakter();
-            String datoText = getString(R.string.tilsynsdato) + Tilsyn.ITEMS.get(position).getDato();
+            String datoText = getString(R.string.tilsynsdato) + "   " + Tilsyn.ITEMS.get(position).getDatoTekst();
 
             Log.d(TAG, "OnBindViewHolder datotekst:" + datoText);
 

@@ -3,6 +3,9 @@ package com.hle.grontlys;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -13,8 +16,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,15 +27,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class SokelisteActivity extends AppCompatActivity implements Response.Listener<String>, Response.ErrorListener {
 
     private String sokeNavn, sokePoststed, arstall;
+    private boolean bruknynorsk;
+    private Location myLocation;
+    private String url;
+    private int sidetall;
 
     private RecyclerView recyclerView;
     private ArrayList<Spisested> spisestedListe = new ArrayList<>();
@@ -45,6 +51,9 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
     //søkeparametre for api
     private static final String KOL_NAVN        = "navn";
     private static final String KOL_POSTSTED    = "poststed";
+    private static final String KOL_POSTNR      = "postnr";
+    private static final String KOL_DATO        = "dato";
+
 
     //logtag
     private static final String TAG = "JsonLog";
@@ -56,39 +65,50 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
-        if (savedInstanceState != null){
-            sokeNavn = savedInstanceState.getString("sokenavn");
-            sokePoststed = savedInstanceState.getString("sokepoststed");
-            arstall = savedInstanceState.getString("arstall");
-        }
-        //Henter søkeresultatet fra Intent
-        else {
-            Intent intent = getIntent();
-
-            if (intent != null){
-                sokeNavn = intent.getStringExtra("sokenavn");
-                Log.d(TAG, "Mottatt søkenavn: " + sokeNavn);
-
-                sokePoststed = intent.getStringExtra("sokepoststed");
-                Log.d(TAG, "Mottatt søkepoststed: " + sokePoststed);
-
-                arstall = intent.getStringExtra("arstall");
-                Log.d(TAG, "Mottatt årstall: " + arstall);
-
-            }
-            else {
-                Log.d(TAG, "Intent = null");
-            }
-
-        }
-
         //henter recyclerview
         recyclerView = findViewById(R.id.spisested_recyclerView);
 
-        //starter metode for datasøk
-        hentSpisestedData();
+        Intent intent = getIntent();
+
+        //henter inndatafor viewet. Sjekker om man har lokasjonssøk eller vanlig søk
+        if (intent != null){
+            int soketype = intent.getIntExtra("soketype", 0);
+            Log.d(TAG, "Mottatt søketype: " + soketype);
+
+            if (soketype == MainActivity.INTENT_LOKASJON){
+                myLocation = (Location) intent.getParcelableExtra("lokasjon");
+                //må ha dummy-verdi, lokasjonssøk sender inn "Alle"
+                arstall = intent.getStringExtra("arstall");
+                Log.d(TAG, "Mottatt lokasjon: " + myLocation.toString());
+            }
+            else if (soketype == MainActivity.INTENT_STANDARD){
+                //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
+                if (savedInstanceState != null){
+                    sokeNavn = savedInstanceState.getString("sokenavn");
+                    sokePoststed = savedInstanceState.getString("sokepoststed");
+                    arstall = savedInstanceState.getString("arstall");
+                    bruknynorsk = savedInstanceState.getBoolean("nynorsk");
+                } else {
+
+                    sokeNavn = intent.getStringExtra("sokenavn");
+                    Log.d(TAG, "Mottatt søkenavn: " + sokeNavn);
+
+                    sokePoststed = intent.getStringExtra("sokepoststed");
+                    Log.d(TAG, "Mottatt søkepoststed: " + sokePoststed);
+
+                    arstall = intent.getStringExtra("arstall");
+                    Log.d(TAG, "Mottatt årstall: " + arstall);
+
+                    bruknynorsk = intent.getBooleanExtra("nynorsk", false);
+                    Log.d(TAG, "Mottatt nynorskvalg: " + bruknynorsk);
+                }
+
+            }
+
+            //starter metode for datasøk
+            byggSokeUrl();
+
+        }
 
         //setter swipemetoder. Kode hentet direkte fra forelesningsslides
         ItemTouchHelper helper= new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
@@ -126,11 +146,12 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         savedInstanceState.putString("sokenavn", sokeNavn);
         savedInstanceState.putString("sokepoststed", sokePoststed);
         savedInstanceState.putString("arstall", arstall);
+        savedInstanceState.putBoolean("nynorsk", bruknynorsk);
     }
 
-    // På retur hit fra TilsynListActivity trenger det å nullstille static tilsynslistevariabler
+    // På retur hit fra TilsynListActivity trengs det å nullstille static tilsynslistevariabler
     // fra Tilsyn-objekt, ellers henger liste og hashmap igjen til neste runde
-    //Disse listene er konstante så lenge samme spisested er aktivt.
+    // Disse listene er konstante så lenge samme spisested er aktivt.
     @Override
     public void onResume() {
 
@@ -138,7 +159,6 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
         Tilsyn.ITEM_MAP.clear();
         Tilsyn.ITEMS.clear();
-
 
     }
 
@@ -180,65 +200,107 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     /******************************
      *
-     * Søker asynkront ved Volley-oppslag
+     * Metoden bygger opp url for bruk i søk, avhengig av brukerinput
      */
-    private void hentSpisestedData() {
+    private void byggSokeUrl() {
+        url = ENDPOINT;
 
-        //APIet godtar tomme søkefelt, bygger derfor en URL med både spisestednavn og poststed
-        //Årstall må evt sorteres ut etter mottatt respons
-        String URL = ENDPOINT + KOL_NAVN + "=" + sokeNavn
-                        + "&" + KOL_POSTSTED + "=" + sokePoststed;
+        //hvis ingen lokasjon skal løket utføres med søkevariablene
+        if (myLocation == null) {
 
-        Log.d(TAG, URL);
+            //APIet godtar tomme søkefelt, bygger derfor en url med både spisestednavn og poststed
+            url += KOL_NAVN + "=" + sokeNavn + "&" + KOL_POSTSTED + "=" + sokePoststed;
 
+            Log.d(TAG, url);
+
+            //apiet godtar wildcardsøk i kolonne dato (ddmmyyyy), legger inn valgt år som wildcardsøk
+            //%22 (") gir "innramming" av wildcardsøkestreng
+            if (!arstall.equals("Alle")){
+                url += "&" + KOL_DATO + "=%22****" + arstall + "%22";
+            }
+
+            Log.d(TAG, url);
+        }
+
+        else {
+            Geocoder coder = new Geocoder(getApplicationContext());
+            List<Address> geocodeResults;
+
+            try {
+                if (Geocoder.isPresent()){
+                    geocodeResults = coder.getFromLocation(myLocation.getLatitude(), myLocation.getLongitude(), 2);
+                    String mittPostNummer = geocodeResults.get(0).getPostalCode();
+                    Log.d(TAG, "Postnummer: " + mittPostNummer);
+
+                    //velger å gjøre et wildcard-søk på de tre første sifferne i postnummeret
+                    //for høyere sannsynlighet for treff
+                    String sokestreng = "%22" + mittPostNummer.substring(0,3) + "*%22";
+                    url += KOL_POSTNR + "=" + sokestreng;
+
+                    Log.d(TAG, "Lokasjonssøk: " + url);
+                }
+            } catch (IOException ex){
+                displayToast("Problemer med lokasjonsdata!");
+            }
+
+        }
+        //ved oppstart av søket søkes det på side 1 i datasettet
+        sidetall = 1;
+        startSok(url, sidetall);
+
+
+    }
+
+    private void startSok(String url, int sidetall) {
         //henter resultat asynkront vhja Volley
         if (isOnline()){
-            RequestQueue queue = Volley.newRequestQueue(this);
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, URL, this, this);
-            queue.add(stringRequest);
+            url += "&page=" + sidetall;
+            Log.d(TAG, url);
 
+            RequestQueue queue = Volley.newRequestQueue(this);
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url, this, this);
+            queue.add(stringRequest);
         }
     }
 
     @Override
     public void onResponse(String response) {
-        ArrayList<Spisested> liste = Spisested.listSpisesteder(response);
 
-        bearbeidListe(liste);
+        ArrayList<Spisested> nyListe = Spisested.listSpisesteder(response);
+        Log.d(TAG, "OnResponse, spisestedListe: " + spisestedListe.size());
+        Log.d(TAG, "OnResponse, nyListe: " + nyListe.size());
 
-    }
-
-    private void bearbeidListe(ArrayList<Spisested> liste) {
-
-        //dersom man har valgt et årstall må dette sorteres ut
-        if (!arstall.equals("Alle")){
-
-            //itererer igjennom listen og henter ut valgte årstall
-            for (Spisested s : liste) {
-                if (s.getArstall().equals(arstall)){
-                    spisestedListe.add(s);
-                }
-            }
-
-            //årstall = alle
-        } else {
-            spisestedListe = liste;
-        }
-
-        if (spisestedListe.size() == 0){
+        //hvis ingen treff i listen
+        if (nyListe.size() == 0 && spisestedListe.size() == 0){
             finish();
             displayToast("Ingen spisesteder funnet!");
-
         }
+        //hvis søkeresultat er 100 eller fler må søk repeteres med sidetall
+        else if (nyListe.size() > 99){
+            //legger søkeliste til på hovedlisten
+            spisestedListe.addAll(nyListe);
+
+            //øker sideteller og starter nytt søk
+            sidetall ++;
+            startSok(url, sidetall);
+        }
+        //hvis det er mindre enn 100 treff er søket ferdig.
         else {
+            spisestedListe.addAll(nyListe);
+            //sorterer ut individuelle entries når søket er ferdig
+            spisestedListe = Spisested.hentIndividuelle(spisestedListe);
             genererListeView();
         }
-
     }
 
-
+    //viser liste med alle individuelle spisesteder funnet
     private void genererListeView() {
+
+        displayToast("Antall treff: " + spisestedListe.size());
+
+        //sorterer alfabetisk på navn
         Collections.sort(spisestedListe);
+
         spisestedAdapter = new SpisestedAdapter(this, spisestedListe);
         recyclerView.setAdapter(spisestedAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -281,14 +343,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        /*switch (item.getItemId()) {
-            case R.id.action_mainActivity:
-                Intent intent = new Intent(SearchActivity.this, MainActivity.class);
-                startActivity(intent);
-                return true;
-            default:
-                // Gjøre noe her?!
-        } */
+
         return super.onOptionsItemSelected(item);
 
     }

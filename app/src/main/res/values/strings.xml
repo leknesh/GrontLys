@@ -15,7 +15,7 @@
     <string name="happy_face">Happy face</string>
     <string name="title_tilsyn_list">Tilsyner</string>
     <string name="title_tilsyn_detail">Tilsyn Detail</string>
-    <string name="tilsynsdato">Tilsynsdato:   </string>
+    <string name="tilsynsdato">Dato for tilsyn:   </string>
     <string name="tema_1">Tema 1:</string>
     <string name="tema_2">Tema 2:</string>
     <string name="tema_3">Tema 3:</string>
@@ -23,4 +23,21 @@
     <string name="placeholder_long">Placeholder Placeholder Placeholder Placeholder Placeholder Placeholder</string>
     <string name="temagruppe">Temagruppe:</string>
     <string name="karaktervisning">Karaktervisning</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="lagre_favoritter">Lagre favoritter</string>
 </resources>
