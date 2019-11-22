@@ -1,4 +1,4 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.app.Activity;
 import android.content.Context;
@@ -26,16 +26,19 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 
-/**
- * @henriette:
- *
- * Koden her er basert på Android Studio sin Master/detail-mal
- * PLUSS kode hentet fra to eksempler på expandableList:
- * https://stackoverflow.com/questions/24083886/expandablelistview-in-fragment-issue
- * https://androidexample.com/Custom_Expandable_ListView_Tutorial_-_Android_Example/index.php?view=article_discription&aid=107&aaid=129
- * Kode fra eksempler er beholdt med sine opprinnelige variabelnavn der det
- * er mulig, f.ex children, groups, rootView, expListView //
- */
+ //
+ // Kandidat38:
+ //
+ // Koden her er basert på Android Studio sin Master/detail-mal
+ // PLUSS kode hentet fra to eksempler på expandableList:
+ //
+ // https://stackoverflow.com/questions/24083886/expandablelistview-in-fragment-issue
+ // https://androidexample.com/Custom_Expandable_ListView_Tutorial_-_Android_Example/index.php?view=article_discription&aid=107&aaid=129
+ //
+ // Kode fra eksempler er beholdt med sine opprinnelige variabelnavn der det
+ // er mulig, f.ex children, groups, rootView, expListView, ITEM og ITEM_MAP.
+ // Kommentarer på engelsk stammer fra disse tre kildene
+ //
 
 /**
  * Master/detail mal kommentar:
@@ -79,6 +82,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     public TilsynDetailFragment() {
     }
 
+
     //oncreate starter uthenting av tilsynsdetaljer ut fra tilsynsobjekt sendt fra parent activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,18 +90,16 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
         mContext = getContext();
 
-        assert getArguments() != null;
-        if (getArguments().containsKey(ARG_ITEM_ID)){
-
-            Log.d(TAG, "Fragment, args mottatt , item map size = " + Tilsyn.ITEM_MAP.size());
-            valgtTilsyn = Tilsyn.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-            Log.d(TAG, "Fragment, args mottatt " + valgtTilsyn.getTilsynId());
+        //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
+        if (savedInstanceState != null){
+            valgtTilsyn = (Tilsyn) savedInstanceState.getSerializable("valgtilsyn");
         }
-
-        /*henter ut det valgte tilsynsobjektet
-
-        valgtTilsyn = (Tilsyn) getArguments().getSerializable("valgtTilsyn");
-        Log.d(TAG, "Fragment mottatt valgtTilsyn: " + valgtTilsyn.getTilsynId()); */
+        else {
+            assert getArguments() != null;
+            if (getArguments().containsKey(ARG_ITEM_ID)) {
+                valgtTilsyn = Tilsyn.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            }
+        }
 
         //starter metode for uthenting av tilsynsdetaljdata for gjeldende tilsynsId
         assert valgtTilsyn != null;
@@ -108,7 +110,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
-            appBarLayout.setTitle(valgtTilsyn.getNavn() + "\n" + valgtTilsyn.getDatoTekst());
+            appBarLayout.setTitle(valgtTilsyn.getNavn());
         }
     }
 
@@ -129,7 +131,23 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
     }
 
-    //Starter henting av data fra kravpunkttabell fror valgt tilsynsid via volley
+    // Lagrer valgt spisested
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        super.onSaveInstanceState(savedInstanceState);
+
+        //siden henting av savedInstanceState vil kjøre nytt søk, må static
+        //arrayliste/hashmap med tilsynsdetaljer nullstilles
+        Tilsyn.ITEM_MAP.clear();
+        Tilsyn.ITEMS.clear();
+        savedInstanceState.putSerializable("valgtilsyn", valgtTilsyn);
+
+    }
+
+    //Starter henting av data fra kravpunkttabell for valgt tilsynsId via volley
+    //antar her at det er undersøkt mindre enn hundre kravpunkter i et tilsyn slik
+    //at pagineringssøk ikke er nødvendig
     private void hentTilsynsdetaljer(String tilsynId) {
 
         String URL = ENDPOINT_DETALJ + tilsynId;
@@ -153,12 +171,11 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     }
 
 
-
-
     @Override
     public void onErrorResponse(VolleyError error) {
         displayToast("Problemer med innhenting av data!");
     }
+
 
     //Metode som genererer resultatliste fra JSONrespons, oppretter expandablelistview og
     // tilhørende adapter

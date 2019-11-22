@@ -6,6 +6,8 @@
     android:name="com.hle.grontlys.TilsynListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:layout_centerHorizontal="true"
     app:layoutManager="LinearLayoutManager"
     tools:context=".TilsynListActivity"
     tools:listitem="@layout/tilsyn_list_content" />

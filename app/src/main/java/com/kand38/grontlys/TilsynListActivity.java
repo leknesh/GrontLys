@@ -1,4 +1,4 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,10 +33,11 @@ import androidx.core.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-//@henriette:
+//@kandidat38:
 // Activity som viser oversikt over alle tilsyn utført på et gitt spisested (sendt fra SokelisteActivity)
 // Spisestedobjekt som sendes hit er kun ett av tilsynene som er gjennomført på spisestedet,
 // gjør nytt oppslag i tilsynstabell for å hente full liste over tilsyn på valgte spisested.
@@ -57,7 +60,6 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
     //Tilsyn og liste av tilsynobjekter
     private Tilsyn valgtTilsyn;
-    //protected ArrayList<Tilsyn> tilsynsListe = new ArrayList<>();
 
     //endpoint for CRUD-api
     private static final String ENDPOINT_TILSYN =
@@ -79,23 +81,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
 
-        /* Ikke implementert p.t
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        } */
 
         if (findViewById(R.id.tilsyn_detail_container) != null) {
             // The detail container view will be present only in the
@@ -123,21 +109,26 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
         //metode som legger data om spisestedet inn i viewet
         fyllSpisestedCard();
-        
+
         //starter henting av tilsynsdata
         hentTilsynsOversikt();
 
     }
+
 
     // Lagrer valgt spisested
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
         super.onSaveInstanceState(savedInstanceState);
+
+        //siden henting av savedInstanceState vil kjøre nytt søk, må static
+        //arrayliste/hashmap med tilsynsdetaljer nullstilles
+        Tilsyn.ITEM_MAP.clear();
+        Tilsyn.ITEMS.clear();
         savedInstanceState.putSerializable("valgtspisested", valgtSpisested);
 
     }
-
 
     /**
      * Egne metoder og utilities
@@ -158,6 +149,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         postStedTV = findViewById(R.id.poststed_card);
         arstallTV = findViewById(R.id.dato_card);
 
+
         //knytter inn data fra valgt spisested.
         navnTV.setText(valgtSpisested.getNavn());
         orgNrTV.setText(valgtSpisested.getOrgNr());
@@ -166,6 +158,41 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         postStedTV.setText(valgtSpisested.getPostSted());
         arstallTV.setText("");
 
+    }
+
+    //legger info om resultater for gjeldende tilsyn i viewet
+    private void fyllResultatOversikt() {
+        TextView tema1TV, tema2TV, tema3TV, tema4TV,  datoTV;
+
+        Tilsyn nyeste = Tilsyn.ITEMS.get(0);
+        ArrayList<Tilsyn.Temaresultat> resultat = nyeste.getTilsynResultater();
+
+        tema1TV = findViewById(R.id.frame_tema1);
+        tema2TV = findViewById(R.id.frame_tema2);
+        tema3TV = findViewById(R.id.frame_tema3);
+        tema4TV = findViewById(R.id.frame_tema4);
+        datoTV = findViewById(R.id.frame_dato);
+
+
+        String tema1 = resultat.get(0).getTemanavn()
+                + ": " + resultat.get(0).getTemakarakter();
+
+        String tema2 = resultat.get(1).getTemanavn()
+                + ": " + resultat.get(1).getTemakarakter();
+
+        String tema3 = resultat.get(2).getTemanavn()
+                + ": " + resultat.get(2).getTemakarakter();
+
+        String tema4 = resultat.get(3).getTemanavn()
+                + ": " + resultat.get(3).getTemakarakter();
+
+        String artxt = "Seneste tilsyn: " + nyeste.getDatoTekst();
+
+        tema1TV.setText(tema1);
+        tema2TV.setText(tema2);
+        tema3TV.setText(tema3);
+        tema4TV.setText(tema4);
+        datoTV.setText(artxt);
     }
 
 
@@ -187,16 +214,24 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     public void onResponse(String response) {
 
         //bygger liste og hashmap av tilsyn ved respons
-        Tilsyn.listTilsyn(response);
+       Tilsyn.listTilsyn(response);
 
         //sjekk av status på liste/hashmap
         Log.d(TAG, "Tilsynsliste: " + Tilsyn.ITEMS.size()
             + ", tilsynshashmap: " + Tilsyn.ITEM_MAP.size());
 
+        //metode som fyller resultatoversikten
+        fyllResultatOversikt();
+
         //view til listen
-        View recyclerView = findViewById(R.id.tilsyn_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.tilsyn_list);
+
+        //henter inn antall kolonner fra values, verdi 2 i landscape
+        // https://stackoverflow.com/questions/29579811/changing-number-of-columns-with-gridlayoutmanager-and-recyclerview
+        final int columns = getResources().getInteger(R.integer.list_columns);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, columns));
+
+        setupRecyclerView(recyclerView);
     }
 
     @Override
@@ -291,7 +326,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         SimpleItemRecyclerViewAdapter(TilsynListActivity parent,
                                       List<Tilsyn> items,
                                       boolean twoPane) {
-            Log.d(TAG, "SimpleRecyclerViewAdapter: " + items.size());
+
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
@@ -310,26 +345,23 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         public void onBindViewHolder(final ViewHolder holder, int position) {
             valgtTilsyn = mValues.get(position);
             String karakter = Tilsyn.ITEMS.get(position).getTotKarakter();
-            String datoText = getString(R.string.tilsynsdato) + "   " + Tilsyn.ITEMS.get(position).getDatoTekst();
 
-            Log.d(TAG, "OnBindViewHolder datotekst:" + datoText);
-
-            holder.mDatoView.setText(datoText);
+            holder.mDatoView.setText(Tilsyn.ITEMS.get(position).getDatoTekst());
             //ref karakterskala beskrevet her: https://data.norge.no/data/mattilsynet/smilefjestilsyn-p%C3%A5-serveringssteder
 
             switch (karakter) {
                 case "0":
                 case "1":
-                    holder.mKarakterView.setImageResource(R.drawable.ic_sentiment_satisfied_green_60dp);
+                    holder.mKarakterView.setImageResource(R.drawable.ic_sentiment_satisfied_green_24dp);
                     break;
                 case "2":
-                    holder.mKarakterView.setImageResource(R.drawable.ic_sentiment_neutral_yellow_60dp);
+                    holder.mKarakterView.setImageResource(R.drawable.ic_sentiment_neutral_yellow_24dp);
                     break;
                 case "3":
-                    holder.mKarakterView.setImageResource(R.drawable.ic_sentiment_dissatisfied_red_60dp);
+                    holder.mKarakterView.setImageResource(R.drawable.ic_sentiment_dissatisfied_red_24dp);
                     break;
                 default:
-                    holder.mKarakterView.setImageResource(R.drawable.ic_highlight_off_blue_60dp);
+                    holder.mKarakterView.setImageResource(R.drawable.ic_remove_circle_outline_blue_24dp);
                     break;
             }
 

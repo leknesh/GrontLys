@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hle.grontlys">
+    package="com.kand38.grontlys">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -23,7 +23,7 @@
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hle.grontlys.MainActivity" />
+                android:value="com.kand38.grontlys.MainActivity" />
         </activity>
         <activity
             android:name=".TilsynListActivity"
@@ -32,7 +32,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hle.grontlys.SokelisteActivity" />
+                android:value="com.kand38.grontlys.SokelisteActivity" />
         </activity>
         <activity
             android:name=".TilsynDetailActivity"
@@ -41,7 +41,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hle.grontlys.TilsynListActivity" />
+                android:value="com.kand38.grontlys.TilsynListActivity" />
         </activity>
         <activity
             android:name=".SokelisteActivity"
@@ -50,11 +50,10 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hle.grontlys.MainActivity" />
+                android:value="com.kand38.grontlys.MainActivity" />
         </activity>
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

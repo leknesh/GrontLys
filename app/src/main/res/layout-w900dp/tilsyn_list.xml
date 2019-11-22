@@ -27,7 +27,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="com.hle.grontlys.TilsynListActivity"
+        tools:context="com.kand38.grontlys.TilsynListActivity"
         tools:listitem="@layout/tilsyn_list_content" />
 
     <FrameLayout

@@ -6,15 +6,15 @@
     <string name="sok_poststed">Søk poststed</string>
     <string name="sok">Søk</string>
     <string name="sok_her">Søk i nærheten</string>
-    <string name="title_sokeliste">SokelisteActivity</string>
+    <string name="title_sokeliste"></string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="angry_face">Angry face</string>
     <string name="neutral_face">Neutral Face</string>
     <string name="happy_face">Happy face</string>
-    <string name="title_tilsyn_list">Tilsyner</string>
-    <string name="title_tilsyn_detail">Tilsyn Detail</string>
+    <string name="title_tilsyn_list"></string>
+    <string name="title_tilsyn_detail">Tilsynsrapport</string>
     <string name="tilsynsdato">Dato for tilsyn:   </string>
     <string name="tema_1">Tema 1:</string>
     <string name="tema_2">Tema 2:</string>
@@ -25,19 +25,11 @@
     <string name="karaktervisning">Karaktervisning</string>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
+    <!-- Preferences -->
 
-    <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
-
-    <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="lagre_favoritter">Lagre favoritter</string>
+    <string name="velg_tilsynsdato">Velg tilsynsdato</string>
+    <string name="velg_arstall">Velg årstall</string>
+    <string name="header">Søk i Tilsynsrapporter</string>
+
 </resources>

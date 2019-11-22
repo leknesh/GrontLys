@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_centerInParent="false"
+    android:layout_centerInParent="true"
     android:layout_centerHorizontal="false"
     android:layout_gravity="center_horizontal"
     android:orientation="horizontal">
@@ -18,10 +18,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="8dp"
             android:text="@string/placeholder"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textSize="18sp" />
+            android:textSize="14sp" />
 
         <ImageView
             android:id="@+id/karakter_tilsynList"
@@ -29,9 +29,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:drawingCacheQuality="high"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="16dp"
-            tools:srcCompat="@drawable/ic_highlight_off_blue_60dp" />
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
+            tools:srcCompat="@drawable/ic_remove_circle_outline_blue_24dp" />
 
     </RelativeLayout>
 

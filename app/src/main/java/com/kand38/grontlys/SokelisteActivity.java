@@ -1,4 +1,4 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -20,6 +20,7 @@ import com.android.volley.toolbox.Volley;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -221,16 +222,18 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
             Log.d(TAG, url);
         }
-
+        //hvis det er gjort lokasjonssøk bygges url på basis av postnummer
         else {
+            //bruker Geocoder for å oversette koordinater til adresse
             Geocoder coder = new Geocoder(getApplicationContext());
             List<Address> geocodeResults;
 
             try {
                 if (Geocoder.isPresent()){
+                    //henter inn 2 adresser i nærheten av lokasjo
                     geocodeResults = coder.getFromLocation(myLocation.getLatitude(), myLocation.getLongitude(), 2);
+                    //henter postnummer fra det første treffet
                     String mittPostNummer = geocodeResults.get(0).getPostalCode();
-                    Log.d(TAG, "Postnummer: " + mittPostNummer);
 
                     //velger å gjøre et wildcard-søk på de tre første sifferne i postnummeret
                     //for høyere sannsynlighet for treff
@@ -247,7 +250,6 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         //ved oppstart av søket søkes det på side 1 i datasettet
         sidetall = 1;
         startSok(url, sidetall);
-
 
     }
 
@@ -270,24 +272,27 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         Log.d(TAG, "OnResponse, spisestedListe: " + spisestedListe.size());
         Log.d(TAG, "OnResponse, nyListe: " + nyListe.size());
 
-        //hvis ingen treff i listen
+        //hvis ingen treff i listen er søket ferdig og aktiviteten lukkes
         if (nyListe.size() == 0 && spisestedListe.size() == 0){
             finish();
             displayToast("Ingen spisesteder funnet!");
         }
         //hvis søkeresultat er 100 eller fler må søk repeteres med sidetall
         else if (nyListe.size() > 99){
-            //legger søkeliste til på hovedlisten
+            //legger resultat fra gjeldende søk til på hovedlisten
             spisestedListe.addAll(nyListe);
 
-            //øker sideteller og starter nytt søk
+            //øker sideteller og starter nytt søk, gir neste side i det paginerte datasettet
+
             sidetall ++;
             startSok(url, sidetall);
         }
-        //hvis det er mindre enn 100 treff er søket ferdig.
+        //hvis det er mindre enn 100 treff er søket ferdig og viewet bygges opp
+        //ved store søk vil siste side ende opp her
         else {
             spisestedListe.addAll(nyListe);
-            //sorterer ut individuelle entries når søket er ferdig
+
+            //sorterer ut individuelle spisesteder når søket er ferdig
             spisestedListe = Spisested.hentIndividuelle(spisestedListe);
             genererListeView();
         }
@@ -303,7 +308,11 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
         spisestedAdapter = new SpisestedAdapter(this, spisestedListe);
         recyclerView.setAdapter(spisestedAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //henter inn antall kolonner fra values, verdi 2 i landscape
+        // https://stackoverflow.com/questions/29579811/changing-number-of-columns-with-gridlayoutmanager-and-recyclerview
+        final int columns = getResources().getInteger(R.integer.list_columns);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, columns));
     }
 
     @Override

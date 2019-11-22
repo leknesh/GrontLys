@@ -1,7 +1,6 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -23,12 +22,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 
 import java.time.LocalDate;
-import java.time.Year;
 import java.util.ArrayList;
 
 
@@ -238,8 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Sjekk om bruker har gitt tillatelsen.
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    Log.d(TAG, "Lokasjon: " + myLocation.toString());
-                    startLokasjonssok(myLocation);
+                    hentFavoritter();
                 } catch (SecurityException e) {
                     e.printStackTrace();
                 }

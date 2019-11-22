@@ -1,4 +1,4 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.hle.grontlys", appContext.getPackageName());
+        assertEquals("com.com.kand38.grontlys", appContext.getPackageName());
     }
 }

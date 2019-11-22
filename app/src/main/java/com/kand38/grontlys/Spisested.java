@@ -1,9 +1,6 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
-import android.widget.SpinnerAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,7 +10,6 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -181,19 +177,17 @@ public class Spisested implements Serializable, Comparable<Spisested> {
 
     }
 
+    public static Comparator<Spisested> DatoKomparator = new Comparator<Spisested>(){
 
-
-
-
-
-    /*brukes for sjekk av om et orgnummer finnes i gjeldende treffliste
-    @Override
-    public boolean equals(Object o){
-        Spisested s = (Spisested) o;
-
-        return (this.objektId.equals(s.getObjektId()));
-
-    } */
+        @Override
+        public int compare(Spisested s1, Spisested s2) {
+            if (s1.getDato().before(s2.getDato()))
+                return 1;
+            else if (s1.getDato().after(s2.getDato()))
+                return -1;
+            else return 0;
+        }
+    };
 
     @Override
     public String toString() {

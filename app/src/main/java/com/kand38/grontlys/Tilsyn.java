@@ -1,4 +1,4 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.util.Log;
 
@@ -75,8 +75,6 @@ public class Tilsyn extends Spisested implements Serializable {
     // Responsen vil komme etter nytt Volley-søk med spesifikk tilsynsobjektId, dvs kun ett spisested
     public static void listTilsyn(String response) {
 
-
-
         //henter ut array av jsonobjekter
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -89,32 +87,15 @@ public class Tilsyn extends Spisested implements Serializable {
                 //legger forekomsten inn i listene
                 ITEM_MAP.put(tilsyn.tilsynId, tilsyn);
                 ITEMS.add(tilsyn);
-
-                Log.d(TAG, tilsyn.toString());
-                //tilsynsListe.add(tilsyn);
+                ITEMS.sort(Spisested.DatoKomparator);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d(TAG, "JSONException Tilsyn");
         }
-        //return tilsynsListe;
+
     }
-
-    /*Metode som bygger hashmap over tilsyn ut fra Arraylisten.
-    // Trengs i oppsettet av master/detail flow.
-    public static HashMap<String, Tilsyn> lagTilsynHashMap(ArrayList<Tilsyn> liste) {
-
-        HashMap<String, Tilsyn> ITEM_MAP = new HashMap<>();
-
-        //itererer arraylisten og legger til i hashmap med tilsynId som nøkkel
-
-        for (Tilsyn t : liste) {
-            ITEM_MAP.put(t.tilsynId, t);
-        }
-
-        return ITEM_MAP;
-    } */
 
 
     @Override
@@ -141,7 +122,7 @@ public class Tilsyn extends Spisested implements Serializable {
 
 
     //indre klasse for å bygge arrayliste av resultater
-    public class Temaresultat implements Serializable {
+    public static class Temaresultat implements Serializable {
         private String temanavn;
         private String temakarakter;
 

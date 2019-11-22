@@ -1,20 +1,24 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
-import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.ActionBar;
 
 import android.view.MenuItem;
+
+//
+// Kandidat38:
+// Activity generert av Master/detail-oppsettet i Android Studio.
+// Håndterer igangsetting av detaljvisningsfragment.
+// Kommentarer på engelsk er generert av Android Studio
+//
+
 
 /**
  * An activity representing a single Tilsyn detail screen. This
@@ -24,8 +28,6 @@ import android.view.MenuItem;
  */
 public class TilsynDetailActivity extends AppCompatActivity {
 
-    //logtag
-    private static final String TAG = "JsonLog";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,13 +35,7 @@ public class TilsynDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_tilsyn_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-        
 
-        // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        /*if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        } */
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -57,12 +53,9 @@ public class TilsynDetailActivity extends AppCompatActivity {
             arguments.putString(TilsynDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(TilsynDetailFragment.ARG_ITEM_ID));
 
-            Log.d(TAG, "Arguments puttet: " + arguments.getString(TilsynDetailFragment.ARG_ITEM_ID));
 
             TilsynDetailFragment fragment = new TilsynDetailFragment();
             fragment.setArguments(arguments);
-
-            Log.d(TAG, "Arguments satt ");
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.tilsyn_detail_container, fragment)

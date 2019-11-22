@@ -77,10 +77,19 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
+
+        <TextView
+            android:id="@+id/header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingVertical="16dp"
+            android:text="@string/header"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
 
         <EditText
             android:id="@+id/spisested_sokenavn"
@@ -90,11 +99,11 @@
             android:hint="@string/sok_spisested"
             android:inputType="text" />
 
+
         <EditText
             android:id="@+id/poststed_sokenavn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/spisested_sokenavn"
             android:ems="10"
             android:hint="@string/sok_poststed"
             android:inputType="text"
@@ -111,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="8dp"
-                android:text="Velg årstall"
+                android:text="@string/velg_arstall"
                 android:textSize="14sp" />
 
             <Spinner
@@ -131,7 +140,6 @@
             android:id="@+id/sok_knapp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/poststed_sokenavn"
             android:layout_marginTop="24dp"
             android:drawableStart="@drawable/ic_button_sok"
             android:text="@string/sok" />
@@ -140,8 +148,6 @@
             android:id="@+id/vis_her_knapp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sok_knapp"
-            android:layout_alignStart="@id/sok_knapp"
             android:layout_marginTop="24dp"
             android:drawableStart="@drawable/ic_button_her"
             android:text="@string/sok_her" />

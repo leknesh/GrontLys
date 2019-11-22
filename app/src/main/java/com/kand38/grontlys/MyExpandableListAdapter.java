@@ -1,4 +1,4 @@
-package com.hle.grontlys;
+package com.kand38.grontlys;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 
 /**
+ *  Kandidat38:
  *  Klasse for håndtering av data til ExpandableList.
  *  Klassen er i hovedsak bearbeidet/tilpasset kode hentet fra disse kildene:
  *  https://androidexample.com/Custom_Expandable_ListView_Tutorial_-_Android_Example/index.php?view=article_discription&aid=107&aaid=129
@@ -96,6 +97,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         return o;
     }
 
+
     //Call when parent row clicked
     @Override
     public long getGroupId(int groupPosition) {
@@ -103,7 +105,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         return groupPosition;
     }
 
-    //Kalles ved klikk på child row. Dette er ikke implementert
+    //Kalles ved klikk på child row. Dette er ikke videre implementert
     @Override
     public long getChildId(int groupPosition, int childPosition) {
 
@@ -172,7 +174,6 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
         final TilsynsDetalj child = children.get(childPosition);
 
-
         // Inflate childrow.xml file for child rows
         convertView = inflater.inflate(R.layout.list_item_tilsynsdetalj, parentView, false);
 
@@ -212,6 +213,6 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
+        return false;
     }
 }
