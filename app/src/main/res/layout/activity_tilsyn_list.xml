@@ -10,7 +10,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="@dimen/app_bar_height"
         android:foreground="@drawable/mattilsynet_logo"
         android:theme="@style/AppTheme.AppBarOverlay">
 
@@ -27,8 +27,7 @@
         android:id="@+id/card_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/app_bar"
-        android:layout_margin="8dp">
+        android:layout_below="@id/app_bar">
 
         <include layout="@layout/spisested_card" />
     </FrameLayout>
@@ -40,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/card_frame"
         android:layout_marginTop="8dp"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="8dp">
 
 
         <TextView
@@ -58,7 +57,8 @@
             android:id="@+id/frame_tema1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingStart="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toStartOf="@+id/frame_tema2"
             app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +68,8 @@
             android:id="@+id/frame_tema2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/frame_tema1"
@@ -78,7 +79,8 @@
             android:id="@+id/frame_tema3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toStartOf="@+id/frame_tema4"
             app:layout_constraintStart_toStartOf="parent"
@@ -88,7 +90,8 @@
             android:id="@+id/frame_tema4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/frame_tema3"
@@ -103,7 +106,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/resultatframe"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:visibility="visible">
 

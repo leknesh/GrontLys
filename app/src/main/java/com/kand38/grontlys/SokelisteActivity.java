@@ -19,6 +19,7 @@ import com.android.volley.toolbox.Volley;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -35,7 +36,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SokelisteActivity extends AppCompatActivity implements Response.Listener<String>, Response.ErrorListener {
+public class SokelisteActivity extends AppCompatActivity implements Response.Listener<String>, Response.ErrorListener,
+        SearchView.OnQueryTextListener {
 
     private String sokeNavn, sokePoststed, arstall;
     private boolean bruknynorsk;
@@ -44,6 +46,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
     private int sidetall;
 
     private RecyclerView recyclerView;
+    private SearchView searchView;
     private ArrayList<Spisested> spisestedListe = new ArrayList<>();
     private SpisestedAdapter spisestedAdapter;
 
@@ -66,25 +69,32 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //henter recyclerview
+        //henter views
         recyclerView = findViewById(R.id.spisested_recyclerView);
+        searchView = findViewById(R.id.search_view);
+        searchView.setOnQueryTextListener(this);
+
 
         Intent intent = getIntent();
 
-        //henter inndatafor viewet. Sjekker om man har lokasjonssøk eller vanlig søk
-        if (intent != null){
+        //henter inndata for viewet. Sjekker om man har lokasjonssøk eller vanlig søk
+        if (intent != null) {
             int soketype = intent.getIntExtra("soketype", 0);
             Log.d(TAG, "Mottatt søketype: " + soketype);
 
-            if (soketype == MainActivity.INTENT_LOKASJON){
+            //hvis man har valgt lokasjonssøk hentes lokasjonen fra intent
+            if (soketype == MainActivity.INTENT_LOKASJON) {
                 myLocation = (Location) intent.getParcelableExtra("lokasjon");
+
                 //må ha dummy-verdi, lokasjonssøk sender inn "Alle"
                 arstall = intent.getStringExtra("arstall");
                 Log.d(TAG, "Mottatt lokasjon: " + myLocation.toString());
-            }
-            else if (soketype == MainActivity.INTENT_STANDARD){
+
+            //hvis standard søk hentes navn/sted/år
+            } else if (soketype == MainActivity.INTENT_STANDARD) {
+
                 //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
-                if (savedInstanceState != null){
+                if (savedInstanceState != null) {
                     sokeNavn = savedInstanceState.getString("sokenavn");
                     sokePoststed = savedInstanceState.getString("sokepoststed");
                     arstall = savedInstanceState.getString("arstall");
@@ -105,13 +115,12 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
                 }
 
             }
-
-            //starter metode for datasøk
-            byggSokeUrl();
-
         }
 
-        //setter swipemetoder. Kode hentet direkte fra forelesningsslides
+        //starter metode for datasøk
+        byggSokeUrl();
+
+        //setter swipemetoder for cards. Kode hentet direkte fra forelesningsslides
         ItemTouchHelper helper= new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP | ItemTouchHelper.DOWN,
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -253,6 +262,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     }
 
+    //
     private void startSok(String url, int sidetall) {
         //henter resultat asynkront vhja Volley
         if (isOnline()){
@@ -265,8 +275,23 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         }
     }
 
+    //behandling av svar på volley
     @Override
     public void onResponse(String response) {
+
+        opprettListe(response);
+
+    }
+
+    //ved volleyfeil
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        displayToast("Problemer med innhenting av data");
+    }
+
+    private void opprettListe(String response) {
+
+        //genererer nye spisestedobjekter fra volleyresponse inn i ny liste
 
         ArrayList<Spisested> nyListe = Spisested.listSpisesteder(response);
         Log.d(TAG, "OnResponse, spisestedListe: " + spisestedListe.size());
@@ -277,18 +302,20 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
             finish();
             displayToast("Ingen spisesteder funnet!");
         }
-        //hvis søkeresultat er 100 eller fler må søk repeteres med sidetall
+
+        //hvis søkeresultat er 100 eller fler må søk repeteres med bruk av paginering
         else if (nyListe.size() > 99){
+
             //legger resultat fra gjeldende søk til på hovedlisten
             spisestedListe.addAll(nyListe);
 
-            //øker sideteller og starter nytt søk, gir neste side i det paginerte datasettet
-
+            //øker sideteller og starter nytt volleysøk, gir neste side i det paginerte datasettet
             sidetall ++;
             startSok(url, sidetall);
         }
+
         //hvis det er mindre enn 100 treff er søket ferdig og viewet bygges opp
-        //ved store søk vil siste side ende opp her
+        //ved flersidig søk vil siste side ende opp her
         else {
             spisestedListe.addAll(nyListe);
 
@@ -297,6 +324,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
             genererListeView();
         }
     }
+
 
     //viser liste med alle individuelle spisesteder funnet
     private void genererListeView() {
@@ -311,14 +339,10 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
         //henter inn antall kolonner fra values, verdi 2 i landscape
         // https://stackoverflow.com/questions/29579811/changing-number-of-columns-with-gridlayoutmanager-and-recyclerview
-        final int columns = getResources().getInteger(R.integer.list_columns);
+        int columns = getResources().getInteger(R.integer.list_columns);
         recyclerView.setLayoutManager(new GridLayoutManager(this, columns));
     }
 
-    @Override
-    public void onErrorResponse(VolleyError error) {
-
-    }
 
     /******************************
      * Utility-metoder
@@ -357,6 +381,20 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     }
 
+    /******************************
+     * Filtermetoder
+     *
+     */
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        spisestedAdapter.getFilter().filter(query);
+        return false;
+    }
 
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        spisestedAdapter.getFilter().filter(newText);
+        return false;
+    }
 }

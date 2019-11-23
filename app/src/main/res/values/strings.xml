@@ -31,5 +31,6 @@
     <string name="velg_tilsynsdato">Velg tilsynsdato</string>
     <string name="velg_arstall">Velg årstall</string>
     <string name="header">Søk i Tilsynsrapporter</string>
+    <string name="filter_query_hint">Filtrer på navn</string>
 
 </resources>

@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,21 +17,29 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 /**
-*Klasse for opprettelse av spisested-cardviews
+*   Klasse for opprettelse av spisested-cardviews
+ * Tips for filtrering hentet på:
+ * https://stackoverflow.com/questions/29792187/add-a-search-filter-on-recyclerview-with-cards
+ * https://codingwithmitch.com/blog/filtering-recyclerview-searchview/
  */
-public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.SpisestedViewHolder> {
+public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.SpisestedViewHolder>
+        implements Filterable {
 
     //logtag
     private static final String TAG = "JsonLog";
 
     private ArrayList<Spisested> spisestedListe;
+    private ArrayList<Spisested> filtrertListe;
     private Context mContext;
 
-    SpisestedAdapter(Context context, ArrayList<Spisested> spisestedListe) {
+
+    public SpisestedAdapter(Context context, ArrayList<Spisested> spisestedListe) {
         this.spisestedListe = spisestedListe;
         this.mContext = context;
+        this.filtrertListe = (ArrayList<Spisested>) spisestedListe.clone();
     }
 
+    @NonNull
     @Override
     public SpisestedAdapter.SpisestedViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new SpisestedViewHolder(LayoutInflater.from(mContext).inflate(R.layout.spisested_card, parent, false));
@@ -37,19 +47,30 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
     @Override
     public void onBindViewHolder(@NonNull SpisestedAdapter.SpisestedViewHolder holder, int position) {
-        Spisested spisestedet = spisestedListe.get(position);
+        Spisested spisestedet = filtrertListe.get(position);
         holder.bindTo(spisestedet);
     }
 
     @Override
     public int getItemCount() {
-        if (spisestedListe != null)
-            return spisestedListe.size();
+        if (filtrertListe != null)
+            return filtrertListe.size();
         else
             return 0;
     }
 
-    class SpisestedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    //starter filtrering, se klasse UserFilter nederst
+    @Override
+    public Filter getFilter() {
+
+        UserFilter userFilter = new UserFilter(this, spisestedListe);
+
+        return userFilter;
+    }
+
+    //legger inn data i cardviewet
+    class SpisestedViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
 
         //views i et card
         private TextView orgNrTextView;
@@ -78,8 +99,10 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
         //legger data inn i views
         void bindTo(Spisested spisestedet) {
+            String txt = "Org.nr: " + spisestedet.getOrgNr();
+
             navnTextView.setText(spisestedet.getNavn());
-            orgNrTextView.setText("Org.nr: " + spisestedet.getOrgNr());
+            orgNrTextView.setText(txt);
             adresseTextView.setText(spisestedet.getAdresse());
             postNrTextView.setText(spisestedet.getPostNr());
             postStedTextView.setText(spisestedet.getPostSted());
@@ -110,7 +133,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
         public void onClick(View v) {
 
             //henter valgt spisested
-            Spisested spisestedet = spisestedListe.get(getAdapterPosition());
+            Spisested spisestedet = filtrertListe.get(getAdapterPosition());
 
             //oppretter intent og legger ved valgt spisested
             Intent intent = new Intent(mContext, TilsynListActivity.class);
@@ -122,7 +145,53 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
             //starter ny aktivitet
             mContext.startActivity(intent);
         }
+
     }
 
+    //kode hentet fra:
+    //https://stackoverflow.com/questions/29792187/add-a-search-filter-on-recyclerview-with-cards
+    //pluss https://codingwithmitch.com/blog/filtering-recyclerview-searchview/
+
+    static class UserFilter extends Filter {
+
+        private final SpisestedAdapter adapter;
+        private final ArrayList<Spisested> originalListe;
+        private final ArrayList<Spisested> nyListe = new ArrayList<>();
+
+        private UserFilter(SpisestedAdapter adapter, ArrayList<Spisested> originalListe ){
+            super();
+            this.adapter = adapter;
+            this.originalListe = originalListe;
+
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            nyListe.clear();
+            String filterPattern = constraint.toString().toLowerCase().trim();
+            final FilterResults results = new FilterResults();
+
+            if (filterPattern.isEmpty()) {
+                nyListe.addAll(originalListe);
+            } else {
+                for (Spisested s : originalListe) {
+                    if (s.getNavn().toLowerCase().contains(filterPattern)) {
+                        nyListe.add(s);
+                    }
+                }
+            }
+            results.values = nyListe;
+            results.count = nyListe.size();
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            adapter.filtrertListe.clear();
+            adapter.filtrertListe.addAll((ArrayList<Spisested>) results.values);
+            adapter.notifyDataSetChanged();
+        }
+
+    }
 
 }

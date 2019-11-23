@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button visHerKnapp = findViewById(R.id.vis_her_knapp);
         visHerKnapp.setOnClickListener(this);
 
+
         // Oppdaterer og henter settingsverdier
         //Shared Preferences
         SharedPreferences sharedPref = androidx.preference.PreferenceManager.
@@ -222,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_REQUEST_LOCATION);
             else { // Appen har allerede fått tillatelse
                 myLocation = locationManager.getLastKnownLocation(locationProvider);
-                Log.d(TAG, "Lokasjon: " + myLocation.toString());
+
                 startLokasjonssok(myLocation);
             }
         }

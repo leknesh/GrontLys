@@ -228,7 +228,8 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
         //henter inn antall kolonner fra values, verdi 2 i landscape
         // https://stackoverflow.com/questions/29579811/changing-number-of-columns-with-gridlayoutmanager-and-recyclerview
-        final int columns = getResources().getInteger(R.integer.list_columns);
+
+        int columns = getResources().getInteger(R.integer.tilsynlist_columns);
         recyclerView.setLayoutManager(new GridLayoutManager(this, columns));
 
         setupRecyclerView(recyclerView);
