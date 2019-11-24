@@ -56,6 +56,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
     //input fra Intent
     private Spisested valgtSpisested;
+    public int nynorsk;
 
     private Tilsyn nyesteTilsyn;
 
@@ -98,6 +99,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
             valgtSpisested = (Spisested) savedInstanceState.getSerializable("valgtspisested");
             nyesteTilsyn = (Tilsyn) savedInstanceState.getSerializable("nyestetilsyn");
+            nynorsk = savedInstanceState.getInt("bruknynorsk");
 
          }
         else {
@@ -105,6 +107,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             Intent intent = getIntent();
             if (intent != null){
                 valgtSpisested = (Spisested) intent.getSerializableExtra("valgtspisested");
+                nynorsk = intent.getIntExtra("bruknynorsk", 0);
             }
             else {
                 Log.d(TAG, "Tom intent");
@@ -128,6 +131,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
         savedInstanceState.putSerializable("valgtspisested", valgtSpisested);
         savedInstanceState.putSerializable("nyestetilsyn", nyesteTilsyn);
+        savedInstanceState.putInt("bruknynorsk", nynorsk);
 
     }
 
@@ -214,7 +218,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     public void onResponse(String response) {
 
         //bygger liste og hashmap av tilsyn ved respons
-       Tilsyn.listTilsyn(response);
+       Tilsyn.listTilsyn(response, nynorsk);
 
         //sjekk av status på liste/hashmap
         Log.d(TAG, "Tilsynsliste: " + Tilsyn.ITEMS.size()
@@ -309,6 +313,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             if (mTwoPane) {
                 Bundle arguments = new Bundle();
                 arguments.putString(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
+                arguments.putInt("bruknynorsk", nynorsk);
                 TilsynDetailFragment fragment = new TilsynDetailFragment();
                 fragment.setArguments(arguments);
                 mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -319,6 +324,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                 Context context = view.getContext();
                 Intent intent = new Intent(context, TilsynDetailActivity.class);
                 intent.putExtra(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
+                intent.putExtra("bruknynorsk", nynorsk);
 
                 context.startActivity(intent);
             }

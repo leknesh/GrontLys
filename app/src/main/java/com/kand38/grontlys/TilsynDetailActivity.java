@@ -52,6 +52,8 @@ public class TilsynDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putString(TilsynDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(TilsynDetailFragment.ARG_ITEM_ID));
+            arguments.putInt("bruknynorsk",
+                    getIntent().getIntExtra("bruknynorsk", 0) );
 
 
             TilsynDetailFragment fragment = new TilsynDetailFragment();

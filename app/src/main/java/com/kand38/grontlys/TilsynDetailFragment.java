@@ -58,6 +58,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
     //Tilsynsobjekt som sendes inn i fragmentet
     private Tilsyn valgtTilsyn;
+    private int nynorsk;
 
     //liste fylles med alle vurderte tilsynsdetaljobjekter for dette tilsynet
     private ArrayList<TilsynsDetalj> detaljListe = new ArrayList<>();
@@ -93,12 +94,17 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
         if (savedInstanceState != null){
             valgtTilsyn = (Tilsyn) savedInstanceState.getSerializable("valgtilsyn");
+            nynorsk = savedInstanceState.getInt("bruknynorsk");
         }
         else {
             assert getArguments() != null;
             if (getArguments().containsKey(ARG_ITEM_ID)) {
                 valgtTilsyn = Tilsyn.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
             }
+            if (getArguments().containsKey("bruknynorsk")) {
+                nynorsk = getArguments().getInt("bruknynorsk");
+            }
+
         }
 
         //starter metode for uthenting av tilsynsdetaljdata for gjeldende tilsynsId
@@ -111,9 +117,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         //setter opp hovedvindu med toolbar (kode satt opp av master/detail-mal)
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-        if (appBarLayout != null) {
-            appBarLayout.setTitle(valgtTilsyn.getNavn());
-        }
+
     }
 
     @Override
@@ -140,6 +144,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         super.onSaveInstanceState(savedInstanceState);
 
         savedInstanceState.putSerializable("valgtilsyn", valgtTilsyn);
+        savedInstanceState.putInt("bruknynorsk", nynorsk);
 
         //siden henting av savedInstanceState vil kjøre nytt søk, må static
         //arrayliste/hashmap med tilsynsdetaljer nullstilles
@@ -192,7 +197,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
     private void bearbeidRespons(String response) {
 
         //henter alle entries i kravliste-tabell for dette tilsynet
-        detaljListe = TilsynsDetalj.listTilsynsDetaljer(response);
+        detaljListe = TilsynsDetalj.listTilsynsDetaljer(response, nynorsk);
 
         //genererer liste av temaresultat-objekter fra tilsyn-tabellen (<Temanavn, Temakarakter>)
         ArrayList<Tilsyn.Temaresultat> temaResultater = valgtTilsyn.getTilsynResultater();

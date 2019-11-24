@@ -32,12 +32,14 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
     private ArrayList<Spisested> spisestedListe;
     private ArrayList<Spisested> filtrertListe;
     private Context mContext;
+    private int nynorsk;
 
 
     public SpisestedAdapter(Context context, ArrayList<Spisested> spisestedListe) {
         this.spisestedListe = spisestedListe;
         this.mContext = context;
         this.filtrertListe = (ArrayList<Spisested>) spisestedListe.clone();
+        this.nynorsk = SokelisteActivity.nynorsk;
     }
 
     @NonNull
@@ -136,9 +138,10 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
             //henter valgt spisested
             Spisested spisestedet = filtrertListe.get(getAdapterPosition());
 
-            //oppretter intent og legger ved valgt spisested
+            //oppretter intent og legger ved valgt spisested og målform
             Intent intent = new Intent(mContext, TilsynListActivity.class);
             intent.putExtra("valgtspisested", spisestedet);
+            intent.putExtra("bruknynorsk", nynorsk);
 
             //kontroll
             Log.d(TAG, "Valgt Spisested: " + spisestedet.getNavn());

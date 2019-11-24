@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+//klasse som besriver data hentet i kravpunkt-tabellen
+
 public class TilsynsDetalj {
 
     //knyttes mot tilsynsobjekt
@@ -32,22 +34,27 @@ public class TilsynsDetalj {
 
 
     //JSON-konstruktør
-    public TilsynsDetalj(JSONObject jsonObject){
+    public TilsynsDetalj(JSONObject jsonObject, int nynorsk){
 
         this.tilsynDetaljId     = jsonObject.optString(KOL_TILSYNID);
         this.temaId             = jsonObject.optString(KOL_TEMAID).substring(0,1);
         this.punktKarakter      = jsonObject.optString(KOL_KARAKTER);
 
         //bruker andre kolonnebetegnelser hvis nynorsk er valgt
-        if (MainActivity.brukNynorsk) {
+        if (nynorsk == 1) {
             kol_punktNavn       = "kravpunktnavn_nn";
             kol_punktForklaring = "tekst_nn";
+        }
+        else {
+            kol_punktNavn         = "kravpunktnavn_no";
+            kol_punktForklaring   = "tekst_no";
         }
 
         //kan legge inn if/else mot en lagret målform-preference!!!
         this.punktNavn          = jsonObject.optString(kol_punktNavn);
         this.punktForklaring    = jsonObject.optString(kol_punktForklaring);
 
+        Log.d(TAG, "Tilsynsdetalj nynorsk? " + nynorsk + "punktnavn:" + punktNavn );
     }
 
     /******************************
@@ -57,7 +64,7 @@ public class TilsynsDetalj {
 
     //Metode som bygger liste over tilsynsdetaljer ut fra JSON-respons.
     // Responsen vil komme etter nytt Volley-søk med spesifikk tilsynsId, dvs kun ett spesifikt tilsyn
-    public static ArrayList<TilsynsDetalj> listTilsynsDetaljer(String response) {
+    public static ArrayList<TilsynsDetalj> listTilsynsDetaljer(String response, int nynorsk) {
 
         ArrayList<TilsynsDetalj> detaljListe = new ArrayList<>();
         //henter ut array av jsonobjekter
@@ -67,7 +74,7 @@ public class TilsynsDetalj {
 
             //løper igjennom arrayet og oppretter tilsynsobjekter
             for (int i=0; i<jsonArray.length(); i++){
-                TilsynsDetalj tilsynsDetalj = new TilsynsDetalj(jsonArray.getJSONObject(i));
+                TilsynsDetalj tilsynsDetalj = new TilsynsDetalj(jsonArray.getJSONObject(i), nynorsk);
 
                 //dersom karakter for punktet er 5, er punktet ikke vurdert og tas ikke med i resultatlisten!
 
@@ -104,7 +111,7 @@ public class TilsynsDetalj {
 
 
     /******************************
-     * Gettere og settere
+     * Gettere
      *
      */
 

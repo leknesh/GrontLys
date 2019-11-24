@@ -36,10 +36,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/******************************
+ *
+ * Activity som initierer søk og genererer resultatlister som vises frem i
+ * et recyclerview ved hjelp av en adapterklasse
+ */
+
 public class SokelisteActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private String sokeNavn, sokePoststed, arstall, mittPostnummer;
-    private boolean bruknynorsk;
+    protected static int nynorsk;
     private String url;
     private int sidetall;
     private int soketype;
@@ -87,6 +93,7 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
         //henter inndata for acivity. Sjekker om man har lokasjonssøk eller vanlig søk
         if (intent != null) {
             soketype = intent.getIntExtra("soketype", 0);
+            nynorsk = intent.getIntExtra("nynorsk", 0);
 
             //hvis man har valgt lokasjonssøk hentes lokasjonen fra intent, og postnummeroppslag kalles
             if (soketype == MainActivity.INTENT_LOKASJON) {
@@ -100,7 +107,7 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
                     finnPostnummer(myLocation);
                 }
                 else {
-                    //hvis problemer emd lokasjon stoppes søkelisteactivity
+                    //hvis problemer med lokasjon stoppes søkelisteactivity
                     displayToast("Prpblemer med lokasjonsinnhenting");
                     finish();
                 }
@@ -116,13 +123,13 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
                     sokeNavn = savedInstanceState.getString("sokenavn");
                     sokePoststed = savedInstanceState.getString("sokepoststed");
                     arstall = savedInstanceState.getString("arstall");
-                    bruknynorsk = savedInstanceState.getBoolean("nynorsk");
+                    nynorsk = savedInstanceState.getInt("nynorsk");
                 } else {
                     sokeNavn = intent.getStringExtra("sokenavn");
                     sokePoststed = intent.getStringExtra("sokepoststed");
                     arstall = intent.getStringExtra("arstall");
-                    bruknynorsk = intent.getBooleanExtra("nynorsk", false);
-                    Log.d(TAG, "Mottatt nynorskvalg: " + bruknynorsk);
+                    nynorsk = intent.getIntExtra("nynorsk", 0);
+                    Log.d(TAG, "Mottatt nynorskvalg: " + nynorsk);
                 }
 
                 //starter metode for datasøk
@@ -167,7 +174,7 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
         savedInstanceState.putString("sokenavn", sokeNavn);
         savedInstanceState.putString("sokepoststed", sokePoststed);
         savedInstanceState.putString("arstall", arstall);
-        savedInstanceState.putBoolean("nynorsk", bruknynorsk);
+        savedInstanceState.putInt("nynorsk", nynorsk);
     }
 
     // På retur hit fra TilsynListActivity trengs det å nullstille static tilsynslistevariabler
@@ -222,7 +229,8 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
     /******************************
      *
      * Metoden henter ut postnummer fra Geonorge-database, kalles ved søk på lokasjon
-     */
+     * som ble hentet inn fra MainActivity
+     * */
     private void finnPostnummer(Location myLocation) {
 
         mittPostnummer = "";
@@ -246,18 +254,17 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
                     try {
                         //responsen er nøstet, må hente ut ett adresseobjekt
                         JSONObject jsonObject = new JSONObject(response);
-                        Log.d(TAG, jsonObject.toString());
                         JSONArray jsonArray = jsonObject.getJSONArray("adresser");
-                        Log.d(TAG, jsonArray.toString());
+
+                        //bruker første treff i listen
                         JSONObject adresse = jsonArray.getJSONObject(0);
-                        Log.d(TAG, adresse.toString());
 
                         mittPostnummer = adresse.optString("postnummer");
 
                         byggSokeUrl();
 
                     }
-                    //avslutter activity dersom postnummersøk er mislykket
+                    //avslutter activity dersom respons fra api ikke lar seg avlese
                     catch (JSONException ex) {
                         displayToast("Finner ikke din adresse!");
                         finish();
@@ -329,7 +336,6 @@ public class SokelisteActivity extends AppCompatActivity implements SearchView.O
         //ved oppstart av søket søkes det på side 1 i datasettet
         sidetall = 1;
         startSok(url, sidetall);
-        Log.d(TAG, "Url til søk: " + url);
     }
 
 

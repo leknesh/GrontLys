@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -27,16 +26,30 @@ import android.widget.Toast;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+/******************************
+ * Oppstart acv applikasjon,
+ * deklarerer variabler, oppretter views og tar imot brukerinput
+ * til søk
+ *
+ */
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private EditText navnEditText, poststedEditText;
+    //view-variabler
+    private EditText navnEditText;
+    private EditText poststedEditText;
     private Spinner arstallSpinner;
     private ArrayAdapter spinnerAdapter;
-    private String sokeNavn, sokePoststed, arstall;
+    private String sokeNavn;
+    private String sokePoststed;
+    private String arstall;
+    private int nynorsk;
     private ArrayList<Spisested> spisestedListe= new ArrayList<>();
 
-    public static boolean lagreSted, lagreArstall, brukNynorsk;
+    //preference-variabler
+    public static boolean lagreSted;
+    public static boolean lagreArstall;
+    public static boolean brukNynorsk;
     public final String PREF_ARSTALL_KEY = "arstall";
     public final String PREF_STED_KEY = "poststed";
     public final String PREF_MALFORM_KEY = "malform";
@@ -48,11 +61,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //lokasjonsrelatert
     public final static int MY_REQUEST_LOCATION = 3;
 
+    //Lokasjon
     private Location myLocation;
 
     //logtag
     private static final String TAG = "JsonLog";
 
+    //lager view og henter inn lagrede innstillinger
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //setter opp view-variabler
         navnEditText = findViewById(R.id.spisested_sokenavn);
         poststedEditText = findViewById(R.id.poststed_sokenavn);
-
         arstallSpinner = findViewById(R.id.arstall_spinner);
         byggSpinner();
 
@@ -75,46 +89,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         // Oppdaterer og henter settingsverdier
-        //Shared Preferences
-        SharedPreferences sharedPref = androidx.preference.PreferenceManager.
-                getDefaultSharedPreferences(this);
 
         // Settings får "default"-verdier
         androidx.preference.PreferenceManager.
                 setDefaultValues(this, R.xml.root_preferences, false);
 
-        //sjekker om noen av switchene er på
-        sjekkPreferences(sharedPref);
+        SharedPreferences sharedPref = androidx.preference.PreferenceManager.
+                getDefaultSharedPreferences(this);
+
+        //starter henting av preference-settinger og lagrede variabler
+        sjekkPreferences();
 
     }
 
-    private void sjekkPreferences(SharedPreferences sharedPref) {
+    //lagrer preferanser ved pause
+    @Override
+    protected void onPause() {
 
+        super.onPause();
+        lagrePreferences();
+    }
+
+    //henter inn preferanser ved resume
+    @Override
+    protected void onResume(){
+
+        //her er det et problem med at når nynorsk skrus av, implementeres
+        // ikke dette før appen er restartet. Motsatt vei fungerer ok.
+        sjekkPreferences();
+        super.onResume();
+
+    }
+
+
+    //sjekker lagredepreferences
+    private void sjekkPreferences() {
+
+        SharedPreferences sharedPref = androidx.preference.PreferenceManager.
+                getDefaultSharedPreferences(this);
         lagreSted = sharedPref.getBoolean(SettingsActivity.SAVE_POSTSTED_SWITCH, false);
-        Log.d(TAG, "Lagre kommune? " + lagreSted);
-
         lagreArstall = sharedPref.getBoolean(SettingsActivity.SAVE_ARSTALL_SWITCH, false);
-        Log.d(TAG, "Lagre Årstall? " + lagreArstall);
-
         brukNynorsk = sharedPref.getBoolean(SettingsActivity.MALFORM_SWITCH, false);
-        Log.d(TAG, "Nynorsk? " + brukNynorsk);
 
-        // Hvis lagring er valgt hentes lagrede verdier
-        if (lagreSted || lagreArstall || brukNynorsk) {
-            hentFavoritter();
-            Log.d(TAG, "Lagring valgt");
-        }
+        hentFavoritter();
 
     }
 
+    //henter inn lagret søkepoststed og årstall dersom tilgjengelig
     private void hentFavoritter() {
 
-        SharedPreferences myPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-        String sted = myPreferences.getString(PREF_STED_KEY, "");
-        String ar = myPreferences.getString(PREF_ARSTALL_KEY, "");
+        SharedPreferences sharedPref = androidx.preference.PreferenceManager.
+                getDefaultSharedPreferences(this);
 
-        Log.d(TAG, "Lagret sted: " + sted + ", lagret årstall" + ar);
+        String sted = sharedPref.getString(PREF_STED_KEY, "");
+        String ar = sharedPref.getString(PREF_ARSTALL_KEY, "");
+        nynorsk = sharedPref.getInt(PREF_MALFORM_KEY, 0);
 
+        //legger lagrede variabler inn i view
         if (lagreSted && !(sted.isEmpty()))
             poststedEditText.setText(sted);
 
@@ -131,10 +162,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
-    public void lagrePreferences(){
-        SharedPreferences myPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-        SharedPreferences.Editor editor = myPreferences.edit();
+ public void lagrePreferences(){
+        SharedPreferences sharedPref = androidx.preference.PreferenceManager.
+             getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
 
         if (lagreSted){
             editor.putString(PREF_STED_KEY, poststedEditText.getText().toString());
@@ -142,8 +173,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (lagreArstall){
             editor.putString(PREF_ARSTALL_KEY, arstallSpinner.getSelectedItem().toString());
         }
+        if (brukNynorsk == true)
+            nynorsk = 1;
+        else
+            nynorsk = 0;
 
-        editor.putBoolean(PREF_MALFORM_KEY, brukNynorsk);
+        editor.putInt(PREF_MALFORM_KEY, nynorsk);
 
         editor.apply();
     }
@@ -167,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         arstallSpinner.setAdapter(spinnerAdapter);
     }
 
-
+    //Behandler knappetrykk, starter lokasjons- eller standard søk
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -178,11 +213,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.vis_her_knapp:
                //starter alternativ rute med lokasjonsbasert søk
+                lagrePreferences();
                 hentLokasjon();
+                break;
+            default:
+                break;
         }
     }
 
-
+    //henter inn variabler til standard søk fra view og starter søkeactivity
     private void startSpisestedSok() {
         sokeNavn        = navnEditText.getText().toString();
         sokePoststed    = poststedEditText.getText().toString();
@@ -192,13 +231,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (sokeNavn.isEmpty() && sokePoststed.isEmpty()){
             displayToast("Legg inn navn på spisested og/eller poststed");
         }
+        //oppretter intent, legger inn variabler og starter søkeactivity
         else {
             Intent intent = new Intent(this, SokelisteActivity.class);
             intent.putExtra("soketype", INTENT_STANDARD);
             intent.putExtra("sokenavn", sokeNavn);
             intent.putExtra("sokepoststed", sokePoststed);
             intent.putExtra("arstall", arstall);
-            intent.putExtra("nynorsk", brukNynorsk);
+            intent.putExtra("nynorsk", nynorsk);
 
             startActivity(intent);
         }
@@ -226,7 +266,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (permissionCheck != PackageManager.PERMISSION_GRANTED)
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_REQUEST_LOCATION);
-            else { // Appen har allerede fått tillatelse
+            // Appen har allerede fått tillatelse
+            //henter inn siste kjente lokasjon
+            else {
                 myLocation = locationManager.getLastKnownLocation(locationProvider);
 
                 startLokasjonssok(myLocation);
@@ -250,16 +292,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    //starter søkeactivity med lokasjon som søkeparameter
     private void startLokasjonssok(Location myLocation) {
 
         if (myLocation == null){
             displayToast("Finner ikke lokasjon");
         }
+        //legger inn lokasjon i intent, sammen med en konstant som indikerer
+        //at søket er et lokasjonssøk
         else {
             Intent intent = new Intent(this, SokelisteActivity.class);
             intent.putExtra("lokasjon", myLocation);
             intent.putExtra("soketype", INTENT_LOKASJON);
+            intent.putExtra("nynorsk", nynorsk);
             startActivity(intent);
         }
     }
@@ -294,15 +339,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    /******************************
-     * Håndtering av Landscape/portrait
-     *
-     */
 
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
 
     /******************************
      * Utility-metoder

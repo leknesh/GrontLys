@@ -40,17 +40,23 @@ public class Tilsyn extends Spisested implements Serializable {
 
 
     //JSON-konstruktør
-    public Tilsyn(JSONObject jsonObject){
+    public Tilsyn(JSONObject jsonObject, int nynorsk){
 
         //denne gir navn/adr/totalkarakter mm
         super(jsonObject);
 
         //bruker andre kolonnebetegnelser hvis nynorsk er valgt
-        if (MainActivity.brukNynorsk){
+        if (nynorsk == 1){
             kol_tema1 = "tema1_nn";
             kol_tema2 = "tema2_nn";
             kol_tema3 = "tema3_nn";
             kol_tema4 = "tema4_nn";
+        }
+        else {
+            kol_tema1  = "tema1_no";
+            kol_tema2  = "tema2_no";
+            kol_tema3  = "tema3_no";
+            kol_tema4  = "tema4_no";
         }
 
         //henter ut tilsynsId, temanavn og tilhørende karakter
@@ -73,7 +79,7 @@ public class Tilsyn extends Spisested implements Serializable {
 
     //Metode som bygger liste over tilsyn ut fra JSON-respons.
     // Responsen vil komme etter nytt Volley-søk med spesifikk tilsynsobjektId, dvs kun ett spisested
-    public static void listTilsyn(String response) {
+    public static void listTilsyn(String response, int nynorsk) {
 
         //henter ut array av jsonobjekter
         try {
@@ -82,7 +88,7 @@ public class Tilsyn extends Spisested implements Serializable {
 
             //løper igjennom arrayet og oppretter tilsynsobjekter
             for (int i=0; i<jsonArray.length(); i++){
-                Tilsyn tilsyn = new Tilsyn(jsonArray.getJSONObject(i));
+                Tilsyn tilsyn = new Tilsyn(jsonArray.getJSONObject(i), nynorsk);
 
                 //legger forekomsten inn i listene
                 ITEM_MAP.put(tilsyn.tilsynId, tilsyn);
@@ -135,16 +141,9 @@ public class Tilsyn extends Spisested implements Serializable {
             return temanavn;
         }
 
-        public void setTemanavn(String temanavn) {
-            this.temanavn = temanavn;
-        }
-
         public String getTemakarakter() {
             return temakarakter;
         }
 
-        public void setTemakarakter(String temakarakter) {
-            this.temakarakter = temakarakter;
-        }
     }
 }
