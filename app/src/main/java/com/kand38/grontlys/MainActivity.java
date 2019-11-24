@@ -24,7 +24,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -120,8 +119,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             poststedEditText.setText(sted);
 
         if (lagreArstall && !(ar.isEmpty())){
-            int pos = spinnerAdapter.getPosition(ar);
-            arstallSpinner.setSelection(pos);
+            try {
+                int pos = spinnerAdapter.getPosition(ar);
+                arstallSpinner.setSelection(pos);
+            } catch (Exception ex){
+                Log.d(TAG, "Ooops, spinnerproblem");
+                arstallSpinner.setSelection(0);
+            }
+
         }
 
     }
@@ -230,13 +235,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         if (requestCode == MY_REQUEST_LOCATION) {
         // Sjekk om bruker har gitt tillatelsen.
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    hentFavoritter();
+                    hentLokasjon();
                 } catch (SecurityException e) {
                     e.printStackTrace();
                 }
@@ -255,7 +260,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this, SokelisteActivity.class);
             intent.putExtra("lokasjon", myLocation);
             intent.putExtra("soketype", INTENT_LOKASJON);
-            intent.putExtra("arstall", "Alle");
             startActivity(intent);
         }
     }

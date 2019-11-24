@@ -7,6 +7,7 @@
     android:fitsSystemWindows="true"
     tools:context=".TilsynListActivity">
 
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -21,25 +22,18 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
     <FrameLayout
         android:id="@+id/card_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/app_bar"
-        android:layout_margin="8dp">
+        android:layout_margin="8dp"
+        android:visibility="gone">
 
-        <include layout="@layout/spisested_card" />
+        <include
+            layout="@layout/spisested_card"
+            android:visibility="gone" />
     </FrameLayout>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@id/app_bar"
-        android:layout_margin="16dp"
-        android:src="@drawable/mattilsynet_logo_tiny1"
-         />
 
 
     <RelativeLayout
@@ -97,8 +91,6 @@
             android:padding="8dp"
             android:text="@string/placeholder" />
 
-        />
-
     </RelativeLayout>
 
     <TextView
@@ -111,7 +103,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/velg_tilsynsdato"
         android:textSize="18sp"
-        android:textStyle="bold"></TextView>
+        android:textStyle="bold"/>
 
     <FrameLayout
         android:id="@+id/frameLayout"

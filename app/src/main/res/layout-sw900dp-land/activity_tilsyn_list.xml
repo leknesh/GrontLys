@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,8 +10,10 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/app_bar_height"
-        android:foreground="@drawable/mattilsynet_logo"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
@@ -25,21 +27,32 @@
 
     <FrameLayout
         android:id="@+id/card_frame"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/app_bar">
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/app_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/resultatframe" >
 
-        <include layout="@layout/spisested_card" />
+        <include
+            layout="@layout/spisested_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </FrameLayout>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/resultatframe"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/card_frame"
         android:layout_marginTop="8dp"
-        android:paddingHorizontal="8dp">
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toBottomOf="@id/app_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/card_frame">
 
 
         <TextView
@@ -57,8 +70,7 @@
             android:id="@+id/frame_tema1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingStart="8dp"
+            android:padding="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toStartOf="@+id/frame_tema2"
             app:layout_constraintStart_toStartOf="parent"
@@ -68,8 +80,7 @@
             android:id="@+id/frame_tema2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingEnd="8dp"
+            android:padding="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/frame_tema1"
@@ -79,8 +90,7 @@
             android:id="@+id/frame_tema3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingTop="8dp"
+            android:padding="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toStartOf="@+id/frame_tema4"
             app:layout_constraintStart_toStartOf="parent"
@@ -90,25 +100,28 @@
             android:id="@+id/frame_tema4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
-            android:paddingTop="8dp"
+            android:padding="8dp"
             android:text="@string/placeholder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/frame_tema3"
             app:layout_constraintTop_toBottomOf="@id/frame_tema2" />
 
 
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
 
         android:id="@+id/frameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/resultatframe"
-        android:paddingHorizontal="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:paddingHorizontal="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:visibility="visible">
+        tools:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/resultatframe">
 
         <TextView
             android:id="@+id/tv"
@@ -120,14 +133,15 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
 
 
         <include
             layout="@layout/tilsyn_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -136,7 +150,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
 
 

@@ -102,13 +102,15 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
         }
 
         //starter metode for uthenting av tilsynsdetaljdata for gjeldende tilsynsId
-        assert valgtTilsyn != null;
-        hentTilsynsdetaljer(valgtTilsyn.getTilsynId());
+
+        if (valgtTilsyn != null) {
+            hentTilsynsdetaljer(valgtTilsyn.getTilsynId());
+        }
 
 
         //setter opp hovedvindu med toolbar (kode satt opp av master/detail-mal)
         Activity activity = this.getActivity();
-        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
             appBarLayout.setTitle(valgtTilsyn.getNavn());
         }
@@ -119,7 +121,7 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.tilsyn_detail, container, false);
 
-        expListView = (ExpandableListView) rootView.findViewById(R.id.expListView);
+        expListView = rootView.findViewById(R.id.expListView);
 
         return rootView;
     }
@@ -137,12 +139,20 @@ public class TilsynDetailFragment extends Fragment implements Response.ErrorList
 
         super.onSaveInstanceState(savedInstanceState);
 
+        savedInstanceState.putSerializable("valgtilsyn", valgtTilsyn);
+
         //siden henting av savedInstanceState vil kjøre nytt søk, må static
         //arrayliste/hashmap med tilsynsdetaljer nullstilles
         Tilsyn.ITEM_MAP.clear();
         Tilsyn.ITEMS.clear();
-        savedInstanceState.putSerializable("valgtilsyn", valgtTilsyn);
 
+
+    }
+
+    @Override
+    public void onPause() {
+
+        super.onPause();
     }
 
     //Starter henting av data fra kravpunkttabell for valgt tilsynsId via volley

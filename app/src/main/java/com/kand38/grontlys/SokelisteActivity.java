@@ -3,8 +3,6 @@ package com.kand38.grontlys;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -17,13 +15,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -31,27 +29,28 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
-public class SokelisteActivity extends AppCompatActivity implements Response.Listener<String>, Response.ErrorListener,
-        SearchView.OnQueryTextListener {
+public class SokelisteActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    private String sokeNavn, sokePoststed, arstall;
+    private String sokeNavn, sokePoststed, arstall, mittPostnummer;
     private boolean bruknynorsk;
-    private Location myLocation;
     private String url;
     private int sidetall;
+    private int soketype;
 
     private RecyclerView recyclerView;
-    private SearchView searchView;
     private ArrayList<Spisested> spisestedListe = new ArrayList<>();
     private SpisestedAdapter spisestedAdapter;
 
     //endpoint for CRUD-api
     private static final String ENDPOINT = "https://hotell.difi.no/api/json/mattilsynet/smilefjes/tilsyn?";
+    private static final String ENDPOINT_ADRESSE = "https://ws.geonorge.no/adresser/v1/punktsok?";
     //søkeparametre for api
     private static final String KOL_NAVN        = "navn";
     private static final String KOL_POSTSTED    = "poststed";
@@ -62,6 +61,15 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
     //logtag
     private static final String TAG = "JsonLog";
 
+    /******************************
+     *
+     * onCreate henter inn søkevariabler fra intent evt savedInstancestate. Dersom det skal gjøres
+     * lokasjonssøk hentes først lokalt postnummer fra Geonorge før hovedsøk starter. Dersom det er
+     * standard søk starter hovedsøk med en gang på bakgrunn av innhentede variabler.
+     * Det meste av layouthåndtering gjøres av spisestedadapter, men her settes lyttermetoder for
+     * sveip av resultatcards
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,54 +79,56 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
         //henter views
         recyclerView = findViewById(R.id.spisested_recyclerView);
-        searchView = findViewById(R.id.search_view);
+        SearchView searchView = findViewById(R.id.search_view);
         searchView.setOnQueryTextListener(this);
-
 
         Intent intent = getIntent();
 
-        //henter inndata for viewet. Sjekker om man har lokasjonssøk eller vanlig søk
+        //henter inndata for acivity. Sjekker om man har lokasjonssøk eller vanlig søk
         if (intent != null) {
-            int soketype = intent.getIntExtra("soketype", 0);
-            Log.d(TAG, "Mottatt søketype: " + soketype);
+            soketype = intent.getIntExtra("soketype", 0);
 
-            //hvis man har valgt lokasjonssøk hentes lokasjonen fra intent
+            //hvis man har valgt lokasjonssøk hentes lokasjonen fra intent, og postnummeroppslag kalles
             if (soketype == MainActivity.INTENT_LOKASJON) {
-                myLocation = (Location) intent.getParcelableExtra("lokasjon");
+                Location myLocation = intent.getParcelableExtra("lokasjon");
 
                 //må ha dummy-verdi, lokasjonssøk sender inn "Alle"
-                arstall = intent.getStringExtra("arstall");
-                Log.d(TAG, "Mottatt lokasjon: " + myLocation.toString());
+                arstall = "Alle";
 
-            //hvis standard søk hentes navn/sted/år
-            } else if (soketype == MainActivity.INTENT_STANDARD) {
+                //kaller metode som henter postnummer og deretter starter spisestedsøk
+                if (myLocation != null) {
+                    finnPostnummer(myLocation);
+                }
+                else {
+                    //hvis problemer emd lokasjon stoppes søkelisteactivity
+                    displayToast("Prpblemer med lokasjonsinnhenting");
+                    finish();
+                }
 
-                //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
+
+            }
+            //hvis standard søk hentes navn/sted/år fra intent
+             else if (soketype == MainActivity.INTENT_STANDARD) {
+
+                //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige,
+                //eller henter fra intent hvis ikke
                 if (savedInstanceState != null) {
                     sokeNavn = savedInstanceState.getString("sokenavn");
                     sokePoststed = savedInstanceState.getString("sokepoststed");
                     arstall = savedInstanceState.getString("arstall");
                     bruknynorsk = savedInstanceState.getBoolean("nynorsk");
                 } else {
-
                     sokeNavn = intent.getStringExtra("sokenavn");
-                    Log.d(TAG, "Mottatt søkenavn: " + sokeNavn);
-
                     sokePoststed = intent.getStringExtra("sokepoststed");
-                    Log.d(TAG, "Mottatt søkepoststed: " + sokePoststed);
-
                     arstall = intent.getStringExtra("arstall");
-                    Log.d(TAG, "Mottatt årstall: " + arstall);
-
                     bruknynorsk = intent.getBooleanExtra("nynorsk", false);
                     Log.d(TAG, "Mottatt nynorskvalg: " + bruknynorsk);
                 }
 
+                //starter metode for datasøk
+                byggSokeUrl();
             }
         }
-
-        //starter metode for datasøk
-        byggSokeUrl();
 
         //setter swipemetoder for cards. Kode hentet direkte fra forelesningsslides
         ItemTouchHelper helper= new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
@@ -147,9 +157,10 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         helper.attachToRecyclerView(recyclerView);
     }
 
+
     //tar vare på variabler i viewet
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
         // Lagrer søkestrenger
@@ -175,7 +186,7 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     /******************************
      *
-     * Dialogvindu, kode hentet fra:
+     * Dialogvindu for verifisering av cardswipe, kode hentet fra:
      * https://medium.com/@suragch/making-an-alertdialog-in-android-2045381e2edb
      * https://stackoverflow.com/questions/50137310/confirm-dialog-before-swipe-delete-using-itemtouchhelper
      */
@@ -184,8 +195,8 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
         // setup the alert builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        //builder.setTitle("Sikker?");
         builder.setMessage("Fjerne spisested fra listen?");
+
         // add a button
         builder.setPositiveButton("Jepps!", new DialogInterface.OnClickListener() {
             @Override
@@ -210,13 +221,71 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
     /******************************
      *
+     * Metoden henter ut postnummer fra Geonorge-database, kalles ved søk på lokasjon
+     */
+    private void finnPostnummer(Location myLocation) {
+
+        mittPostnummer = "";
+
+        String postNrUrl = ENDPOINT_ADRESSE
+                + "radius=1000&lat=" + myLocation.getLatitude()
+                + "&lon=" + myLocation.getLongitude()
+                + "&treffPerSide=10&side=0&asciiKompatibel=true";
+
+        Log.d(TAG, postNrUrl);
+
+        //velger å kjøre et internt volleysøk med egen listener i denne metoden for å ikke
+        //rote til respons fra tilsynssøkene
+        if (isOnline()) {
+
+            RequestQueue queue = Volley.newRequestQueue(this);
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, postNrUrl, new Response.Listener<String>() {
+
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        //responsen er nøstet, må hente ut ett adresseobjekt
+                        JSONObject jsonObject = new JSONObject(response);
+                        Log.d(TAG, jsonObject.toString());
+                        JSONArray jsonArray = jsonObject.getJSONArray("adresser");
+                        Log.d(TAG, jsonArray.toString());
+                        JSONObject adresse = jsonArray.getJSONObject(0);
+                        Log.d(TAG, adresse.toString());
+
+                        mittPostnummer = adresse.optString("postnummer");
+
+                        byggSokeUrl();
+
+                    }
+                    //avslutter activity dersom postnummersøk er mislykket
+                    catch (JSONException ex) {
+                        displayToast("Finner ikke din adresse!");
+                        finish();
+                    }
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    displayToast("Finner ikke din adresse!");
+                    finish();
+                }
+            });
+
+            queue.add(stringRequest);
+        }
+    }
+
+    /******************************
+     *
      * Metoden bygger opp url for bruk i søk, avhengig av brukerinput
      */
     private void byggSokeUrl() {
+
         url = ENDPOINT;
 
-        //hvis ingen lokasjon skal løket utføres med søkevariablene
-        if (myLocation == null) {
+        //hvis ingen lokasjon skal søket utføres med søkevariablene
+        if (soketype == MainActivity.INTENT_STANDARD) {
 
             //APIet godtar tomme søkefelt, bygger derfor en url med både spisestednavn og poststed
             url += KOL_NAVN + "=" + sokeNavn + "&" + KOL_POSTSTED + "=" + sokePoststed;
@@ -231,73 +300,90 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
 
             Log.d(TAG, url);
         }
-        //hvis det er gjort lokasjonssøk bygges url på basis av postnummer
-        else {
-            //bruker Geocoder for å oversette koordinater til adresse
-            Geocoder coder = new Geocoder(getApplicationContext());
-            List<Address> geocodeResults;
 
-            try {
-                if (Geocoder.isPresent()){
-                    //henter inn 2 adresser i nærheten av lokasjo
-                    geocodeResults = coder.getFromLocation(myLocation.getLatitude(), myLocation.getLongitude(), 2);
-                    //henter postnummer fra det første treffet
-                    String mittPostNummer = geocodeResults.get(0).getPostalCode();
+        //hvis det er gjort lokasjonssøk bygges url på basis av postnummer hentet ut av Geonorge-db
+        else if (soketype == MainActivity.INTENT_LOKASJON) {
+            //velger å gjøre et wildcard-søk på de tre første sifferne i postnummeret
+            //for høyere sannsynlighet for treff
 
-                    //velger å gjøre et wildcard-søk på de tre første sifferne i postnummeret
-                    //for høyere sannsynlighet for treff
-                    String sokestreng = "%22" + mittPostNummer.substring(0,3) + "*%22";
-                    url += KOL_POSTNR + "=" + sokestreng;
+            String sokestreng ="";
 
-                    Log.d(TAG, "Lokasjonssøk: " + url);
-                }
-            } catch (IOException ex){
-                displayToast("Problemer med lokasjonsdata!");
+            if(mittPostnummer.isEmpty()) {
+                displayToast("Beklager, problem med lokasjonstjenester!");
+                finish();
+            } else {
+                sokestreng = "%22" + mittPostnummer.substring(0, 3) + "*%22";
             }
 
+            url += KOL_POSTNR + "=" + sokestreng;
+
+            Log.d(TAG, "Lokasjonssøk: " + url);
         }
+
+        //hvis verken lokasjon-eller standardsøk :)
+        else {
+            displayToast("Beklager,jeg forstår ikke hva du vil!");
+            finish();
+        }
+
         //ved oppstart av søket søkes det på side 1 i datasettet
         sidetall = 1;
         startSok(url, sidetall);
-
+        Log.d(TAG, "Url til søk: " + url);
     }
 
-    //
+
+    //metode sender søkestreng til tilsynsdatabasen. Respons starter metode som
+    //bygger liste av spisesteder. Sender inn sidetall, denne telles opp i listegenerator
+    //og muliggjør søk i paginert api
     private void startSok(String url, int sidetall) {
+
         //henter resultat asynkront vhja Volley
         if (isOnline()){
+
             url += "&page=" + sidetall;
             Log.d(TAG, url);
 
             RequestQueue queue = Volley.newRequestQueue(this);
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url, this, this);
+
+            //håndterer respons lokalt i metoden da det er to forskjellige apier som
+            //kan gi respons i denne activityen
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+
+                    @Override
+                    public void onResponse(String response) {
+                        //sender respons videre til behandling
+                        opprettListe(response);
+                    }},
+                new Response.ErrorListener() {
+                    //ved feil avsluttes aktiviteten
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        displayToast("Problemer med å søke i tilsynsdatabasen");
+                        finish();
+                    }
+                });
+
             queue.add(stringRequest);
+        }
+        //hvis ikke online
+        else {
+            displayToast("Problemer med nettilgang");
+            finish();
         }
     }
 
-    //behandling av svar på volley
-    @Override
-    public void onResponse(String response) {
-
-        opprettListe(response);
-
-    }
-
-    //ved volleyfeil
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        displayToast("Problemer med innhenting av data");
-    }
+    //Metode som behandler svar fra tilsynsdatabasen.
+    //Bygger liste over spisesteder, sjekker antall og fyrer evt nytt søk hvis
+    //100treff, da er det flere sider i søkeresultatet
 
     private void opprettListe(String response) {
 
-        //genererer nye spisestedobjekter fra volleyresponse inn i ny liste
+        //genererer nye spisestedobjekter fra volleyresponse, legger inn i ny liste
+         ArrayList<Spisested> nyListe = Spisested.listSpisesteder(response);
 
-        ArrayList<Spisested> nyListe = Spisested.listSpisesteder(response);
-        Log.d(TAG, "OnResponse, spisestedListe: " + spisestedListe.size());
-        Log.d(TAG, "OnResponse, nyListe: " + nyListe.size());
-
-        //hvis ingen treff i listen er søket ferdig og aktiviteten lukkes
+        //hvis ingen treff i listen er søkeprosess ferdig uten treff, og aktiviteten lukkes
         if (nyListe.size() == 0 && spisestedListe.size() == 0){
             finish();
             displayToast("Ingen spisesteder funnet!");
@@ -319,7 +405,8 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
         else {
             spisestedListe.addAll(nyListe);
 
-            //sorterer ut individuelle spisesteder når søket er ferdig
+            //sorterer ut individuelle spisesteder når søket er ferdig,
+            //og kaller visningsmetode
             spisestedListe = Spisested.hentIndividuelle(spisestedListe);
             genererListeView();
         }
@@ -382,19 +469,25 @@ public class SokelisteActivity extends AppCompatActivity implements Response.Lis
     }
 
     /******************************
-     * Filtermetoder
-     *
+     * Filter-listenermetoder, kjører filtrering
+     *  ved tasting i søkevindu.
      */
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        spisestedAdapter.getFilter().filter(query);
+
+        if (spisestedAdapter != null)
+            spisestedAdapter.getFilter().filter(query);
         return false;
     }
-
+    //denne håndterer bla. backspace men krasjer applikasjon med nullpointerexception
+    //ved rotasjon av skjerm. Derfor sjekkes adapter før kall på filter.
     @Override
     public boolean onQueryTextChange(String newText) {
-        spisestedAdapter.getFilter().filter(newText);
+
+        if (spisestedAdapter != null)
+            spisestedAdapter.getFilter().filter(newText);
+
         return false;
     }
 }

@@ -10,7 +10,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="@dimen/appBar_large"
         android:foreground="@drawable/mattilsynet_logo"
         android:theme="@style/AppTheme.AppBarOverlay">
 

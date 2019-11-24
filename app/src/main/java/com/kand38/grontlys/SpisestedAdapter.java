@@ -17,8 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 /**
-*   Klasse for opprettelse av spisested-cardviews
- * Tips for filtrering hentet på:
+*   Klasse for opprettelse av spisested-cardviews etter mønster fra pensum.
+ *
+ * Kode for filtrering hentet på:
  * https://stackoverflow.com/questions/29792187/add-a-search-filter-on-recyclerview-with-cards
  * https://codingwithmitch.com/blog/filtering-recyclerview-searchview/
  */
@@ -62,10 +63,10 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
     //starter filtrering, se klasse UserFilter nederst
     @Override
     public Filter getFilter() {
+        Log.d(TAG, "GetFilter, listestr: " + spisestedListe.size() );
 
-        UserFilter userFilter = new UserFilter(this, spisestedListe);
+        return new UserFilter(this, spisestedListe);
 
-        return userFilter;
     }
 
     //legger inn data i cardviewet
@@ -148,7 +149,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
     }
 
-    //kode hentet fra:
+    //kode for klassen Userfilter hentet og bearbeidet ut fra:
     //https://stackoverflow.com/questions/29792187/add-a-search-filter-on-recyclerview-with-cards
     //pluss https://codingwithmitch.com/blog/filtering-recyclerview-searchview/
 
@@ -165,6 +166,8 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
 
         }
 
+        //Sjekker spisestednavn for innhold av input-teksten constraint,
+        // og legger treff på en ny liste
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             nyListe.clear();
@@ -185,6 +188,7 @@ public class SpisestedAdapter extends RecyclerView.Adapter<SpisestedAdapter.Spis
             return results;
         }
 
+        //henter inn resultatliste og oppdaterer listen i adapteret
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             adapter.filtrertListe.clear();

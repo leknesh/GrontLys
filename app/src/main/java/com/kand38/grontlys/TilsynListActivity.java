@@ -24,7 +24,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,8 +57,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     //input fra Intent
     private Spisested valgtSpisested;
 
-    //Tilsyn og liste av tilsynobjekter
-    private Tilsyn valgtTilsyn;
+    private Tilsyn nyesteTilsyn;
 
     //endpoint for CRUD-api
     private static final String ENDPOINT_TILSYN =
@@ -79,9 +77,8 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tilsyn_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         if (findViewById(R.id.tilsyn_detail_container) != null) {
             // The detail container view will be present only in the
@@ -93,14 +90,21 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
         //gjenoppretter variabler fra savedinstancestate hvis de er tilgjengelige
         if (savedInstanceState != null){
+
+            //siden henting av savedInstanceState vil kjøre nytt søk, må static
+            //arrayliste/hashmap med tilsynsdetaljer nullstilles
+            Tilsyn.ITEM_MAP.clear();
+            Tilsyn.ITEMS.clear();
+
             valgtSpisested = (Spisested) savedInstanceState.getSerializable("valgtspisested");
+            nyesteTilsyn = (Tilsyn) savedInstanceState.getSerializable("nyestetilsyn");
+
          }
         else {
             //henter ellers inn valgt spisested fra intent
             Intent intent = getIntent();
             if (intent != null){
                 valgtSpisested = (Spisested) intent.getSerializableExtra("valgtspisested");
-                Log.d(TAG, "Valgt spisested: " + valgtSpisested.toString());
             }
             else {
                 Log.d(TAG, "Tom intent");
@@ -118,15 +122,12 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
     // Lagrer valgt spisested
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
 
         super.onSaveInstanceState(savedInstanceState);
 
-        //siden henting av savedInstanceState vil kjøre nytt søk, må static
-        //arrayliste/hashmap med tilsynsdetaljer nullstilles
-        Tilsyn.ITEM_MAP.clear();
-        Tilsyn.ITEMS.clear();
         savedInstanceState.putSerializable("valgtspisested", valgtSpisested);
+        savedInstanceState.putSerializable("nyestetilsyn", nyesteTilsyn);
 
     }
 
@@ -161,11 +162,10 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     }
 
     //legger info om resultater for gjeldende tilsyn i viewet
-    private void fyllResultatOversikt() {
+    private void fyllResultatOversikt(Tilsyn tilsyn) {
         TextView tema1TV, tema2TV, tema3TV, tema4TV,  datoTV;
 
-        Tilsyn nyeste = Tilsyn.ITEMS.get(0);
-        ArrayList<Tilsyn.Temaresultat> resultat = nyeste.getTilsynResultater();
+        ArrayList<Tilsyn.Temaresultat> resultat = tilsyn.getTilsynResultater();
 
         tema1TV = findViewById(R.id.frame_tema1);
         tema2TV = findViewById(R.id.frame_tema2);
@@ -186,7 +186,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         String tema4 = resultat.get(3).getTemanavn()
                 + ": " + resultat.get(3).getTemakarakter();
 
-        String artxt = "Seneste tilsyn: " + nyeste.getDatoTekst();
+        String artxt = "Seneste tilsyn: " + tilsyn.getDatoTekst();
 
         tema1TV.setText(tema1);
         tema2TV.setText(tema2);
@@ -221,7 +221,8 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             + ", tilsynshashmap: " + Tilsyn.ITEM_MAP.size());
 
         //metode som fyller resultatoversikten
-        fyllResultatOversikt();
+        Tilsyn nyeste = Tilsyn.ITEMS.get(0);
+        fyllResultatOversikt(nyeste);
 
         //view til listen
         RecyclerView recyclerView = findViewById(R.id.tilsyn_list);
@@ -243,7 +244,10 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
     // Checks network connection
     public boolean isOnline() {
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        NetworkInfo networkInfo = null;
+        if (connMgr != null) {
+            networkInfo = connMgr.getActiveNetworkInfo();
+        }
         return (networkInfo != null && networkInfo.isConnected());
     }
 
@@ -252,7 +256,6 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
         Toast.makeText(getApplicationContext(), message,
                 Toast.LENGTH_SHORT).show();
     }
-
 
 
 
@@ -299,33 +302,30 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             @Override
             public void onClick(View view) {
 
-                //set og get tag metoder i viewklassen, sørger for tilordning av klikket element
-                Tilsyn tilsyn = (Tilsyn) view.getTag();
+            //set og get tag metoder i viewklassen, sørger for tilordning av klikket element
+            Tilsyn tilsyn = (Tilsyn) view.getTag();
 
-                Log.d(TAG, "Valgt tilsyn: " + tilsyn.toString() );
+            //hvis stor skjerm/tablet kjøres activity og fragment i samme view
+            if (mTwoPane) {
+                Bundle arguments = new Bundle();
+                arguments.putString(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
+                TilsynDetailFragment fragment = new TilsynDetailFragment();
+                fragment.setArguments(arguments);
+                mParentActivity.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.tilsyn_detail_container, fragment)
+                        .commit();
+            //ved liten skjerm startes først activity, deretter fragment fra activityen
+            } else {
+                Context context = view.getContext();
+                Intent intent = new Intent(context, TilsynDetailActivity.class);
+                intent.putExtra(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
 
-                //hvis stor skjerm/tablet kjøres activity og fragment i samme view
-                if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
-                    TilsynDetailFragment fragment = new TilsynDetailFragment();
-                    fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.tilsyn_detail_container, fragment)
-                            .commit();
-                //ved liten skjerm startes først activity, deretter fragment fra activityen
-                } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, TilsynDetailActivity.class);
-                    intent.putExtra(TilsynDetailFragment.ARG_ITEM_ID, tilsyn.getTilsynId());
-                    Log.d(TAG, "Extra puttet: "+ tilsyn.getTilsynId());
-                    context.startActivity(intent);
-                }
+                context.startActivity(intent);
+            }
             }
         };
 
-        SimpleItemRecyclerViewAdapter(TilsynListActivity parent,
-                                      List<Tilsyn> items,
+        SimpleItemRecyclerViewAdapter(TilsynListActivity parent, List<Tilsyn> items,
                                       boolean twoPane) {
 
             mValues = items;
@@ -341,10 +341,10 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
             return new ViewHolder(view);
         }
 
-
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            valgtTilsyn = mValues.get(position);
+            //Tilsyn og liste av tilsynobjekter
+            Tilsyn valgtTilsyn = mValues.get(position);
             String karakter = Tilsyn.ITEMS.get(position).getTotKarakter();
 
             holder.mDatoView.setText(Tilsyn.ITEMS.get(position).getDatoTekst());
@@ -366,15 +366,13 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
                     break;
             }
 
-            Log.d(TAG, "Switch på karakter ok, kar " + karakter);
-
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
         }
 
         @Override
         public int getItemCount() {
-            Log.d(TAG, "getItemCount: " + mValues.size());
+
             return mValues.size();
 
         }
@@ -386,7 +384,7 @@ public class TilsynListActivity extends AppCompatActivity implements Response.Er
 
             ViewHolder(View view) {
                 super(view);
-                Log.d(TAG, "ViewHolder: ");
+
                 mDatoView = view.findViewById(R.id.dato_tilsynlist);
                 mKarakterView = view.findViewById(R.id.karakter_tilsynList);
             }

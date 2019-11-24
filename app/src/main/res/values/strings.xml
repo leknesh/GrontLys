@@ -1,26 +1,26 @@
 <resources>
     <string name="app_name">Grønt Lys</string>
     <string name="action_settings">Settings</string>
-    <string name="placeholder">Placeholder</string>
+    <string name="placeholder"> </string>
     <string name="sok_spisested">Søk spisested</string>
     <string name="sok_poststed">Søk poststed</string>
     <string name="sok">Søk</string>
     <string name="sok_her">Søk i nærheten</string>
-    <string name="title_sokeliste"></string>
+    <string name="title_sokeliste"> </string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="angry_face">Angry face</string>
     <string name="neutral_face">Neutral Face</string>
     <string name="happy_face">Happy face</string>
-    <string name="title_tilsyn_list"></string>
+    <string name="title_tilsyn_list"> </string>
     <string name="title_tilsyn_detail">Tilsynsrapport</string>
     <string name="tilsynsdato">Dato for tilsyn:   </string>
     <string name="tema_1">Tema 1:</string>
     <string name="tema_2">Tema 2:</string>
     <string name="tema_3">Tema 3:</string>
     <string name="tema_4">Tema 4 :</string>
-    <string name="placeholder_long">Placeholder Placeholder Placeholder Placeholder Placeholder Placeholder</string>
+    <string name="placeholder_long"> </string>
     <string name="temagruppe">Temagruppe:</string>
     <string name="karaktervisning">Karaktervisning</string>
     <string name="title_activity_settings">Settings</string>
@@ -29,8 +29,9 @@
 
     <string name="lagre_favoritter">Lagre favoritter</string>
     <string name="velg_tilsynsdato">Velg tilsynsdato</string>
-    <string name="velg_arstall">Velg årstall</string>
+    <string name="velg_arstall">Årstall</string>
     <string name="header">Søk i Tilsynsrapporter</string>
     <string name="filter_query_hint">Filtrer på navn</string>
+    <string name="liten_logo">Liten Logo</string>
 
 </resources>
